@@ -4,8 +4,28 @@
   "package": "com.blackgear.offlimits.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "common.level.BiomeMixin",
+    "common.level.BlockGetterMixin",
+    "common.level.HeightmapMixin",
+    "common.level.LevelMixin",
+    "common.level.LevelReaderMixin",
+    "common.level.chunk.ChunkAccessMixin",
+    "common.level.chunk.ChunkSerializerMixin",
+    "common.level.chunk.LevelChunkMixin",
+    "common.level.chunk.ProtoChunkMixin",
+    "common.level.chunk.ProtoTickListMixin",
+    "common.level.chunk.SectionStorageMixin",
+    "common.level.network.ClientboundLevelChunkPacketMixin",
+    "server.DedicatedServerPropertiesMixin",
+    "server.PlayerListMixin",
+    "server.level.ChunkHolderMixin",
+    "server.level.ChunkMapMixin",
+    "server.level.ServerTickListMixin"
   ],
   "client": [
+    "client.LevelRendereMixin",
+    "client.ViewAreaMixin",
+    "server.IntegratedServerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
