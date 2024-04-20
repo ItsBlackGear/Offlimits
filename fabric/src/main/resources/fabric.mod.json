@@ -3,10 +3,15 @@
   "id": "offlimits",
   "version": "${version}",
 
-  "name": "offlimits",
-  "description": "",
-  "authors": [],
-  "contact": {},
+  "name": "Offlimits",
+  "description": "Expand the world building limits!",
+  "authors": [
+    "ItsBlackGear"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/offlimits",
+    "sources": "https://github.com/ItsBlackGear/Offlimits"
+  },
 
   "license": "MIT",
   "icon": "icon.png",

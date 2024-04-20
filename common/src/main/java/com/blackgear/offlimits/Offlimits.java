@@ -9,6 +9,5 @@ public class Offlimits {
 	public static final HeightLimitAccess INSTANCE = HeightLimitAccess.of(320, 0);
 	public static final LightLimitAccess LIGHT = new LightLimitAccess() {};
 	
-	public static void init() {
-	}
+	public static void init() {}
 }
