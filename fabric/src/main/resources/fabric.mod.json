@@ -22,7 +22,7 @@
     "offlimits-common.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.15.10",
+    "fabricloader": "*",
     "minecraft": ">=1.16.5"
   }
 }

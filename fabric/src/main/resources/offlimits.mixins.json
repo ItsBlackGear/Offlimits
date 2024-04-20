@@ -4,6 +4,8 @@
   "package": "com.blackgear.offlimits.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "sodium.ChunkRenderColumnMixin",
+    "sodium.ChunkRenderManagerMixin"
   ],
   "client": [
   ],
