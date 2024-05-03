@@ -1,5 +1,6 @@
 package com.blackgear.offlimits.mixin.common.level;
 
+import com.blackgear.offlimits.Offlimits;
 import net.minecraft.world.level.BlockGetter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -12,6 +13,6 @@ public interface BlockGetterMixin {
      */
     @Overwrite
     default int getMaxBuildHeight() {
-        return 512;
+        return Offlimits.INSTANCE.getMaxBuildHeight();
     }
 }

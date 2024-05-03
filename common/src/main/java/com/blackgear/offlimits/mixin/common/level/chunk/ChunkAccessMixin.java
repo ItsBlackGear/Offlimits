@@ -3,13 +3,25 @@ package com.blackgear.offlimits.mixin.common.level.chunk;
 import com.blackgear.offlimits.Offlimits;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ChunkAccess.class)
 public interface ChunkAccessMixin {
+    @Shadow @Nullable LevelChunkSection getHighestSection();
     @Shadow LevelChunkSection[] getSections();
+    
+    /**
+     * @author ItsBlackGear
+     * @reason we cannot modify the constant in an interface.
+     */
+    @Overwrite
+    default int getHighestSectionPosition() {
+        LevelChunkSection levelChunkSection = this.getHighestSection();
+        return levelChunkSection == null ? Offlimits.INSTANCE.getMinBuildHeight() : levelChunkSection.bottomBlockY();
+    }
     
     /**
      * @author ItsBlackGear

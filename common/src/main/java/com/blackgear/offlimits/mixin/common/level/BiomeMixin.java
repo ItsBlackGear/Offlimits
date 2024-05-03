@@ -12,15 +12,31 @@ public class BiomeMixin {
         method = "shouldSnow",
         constant = @Constant(intValue = 256)
     )
-    private int offlimits$shouldSnow(int original) {
+    private int offlimits$shouldSnowMax(int original) {
         return Offlimits.INSTANCE.getMaxBuildHeight();
+    }
+    
+    @ModifyConstant(
+        method = "shouldSnow",
+        constant = @Constant(intValue = 0)
+    )
+    private int offlimits$shouldSnowMin(int original) {
+        return Offlimits.INSTANCE.getMinBuildHeight();
     }
     
     @ModifyConstant(
         method = "shouldFreeze(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Z)Z",
         constant = @Constant(intValue = 256)
     )
-    private int offlimits$shouldFreeze(int original) {
+    private int offlimits$shouldFreezeMax(int original) {
         return Offlimits.INSTANCE.getMaxBuildHeight();
+    }
+    
+    @ModifyConstant(
+        method = "shouldFreeze(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Z)Z",
+        constant = @Constant(intValue = 0)
+    )
+    private int offlimits$shouldFreezeMin(int original) {
+        return Offlimits.INSTANCE.getMinBuildHeight();
     }
 }

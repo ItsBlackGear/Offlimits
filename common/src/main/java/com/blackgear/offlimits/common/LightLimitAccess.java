@@ -12,6 +12,6 @@ public interface LightLimitAccess {
     }
     
     default int getMaxLightSection() {
-        return this.getMinLightSection() + getLightSectionCount();
+        return this.getMinLightSection() + this.getLightSectionCount();
     }
 }

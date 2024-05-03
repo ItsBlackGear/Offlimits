@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "sodium.ChunkRenderColumnMixin",
-    "sodium.ChunkRenderManagerMixin"
+    "sodium.ChunkRenderManagerMixin",
+    "sodium.ClonedChunkSectionMixin"
   ],
   "client": [
   ],
