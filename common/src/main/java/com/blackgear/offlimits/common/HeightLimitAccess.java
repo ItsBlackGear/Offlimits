@@ -1,6 +1,5 @@
 package com.blackgear.offlimits.common;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 
 public interface HeightLimitAccess {
@@ -22,14 +21,6 @@ public interface HeightLimitAccess {
     
     default int getMaxSection() {
         return SectionPos.blockToSectionCoord(this.getMaxBuildHeight() - 1) + 1;
-    }
-    
-    default boolean isOutsideBuildHeight(BlockPos pos) {
-        return this.isOutsideBuildHeight(pos.getY());
-    }
-    
-    default boolean isOutsideBuildHeight(int y) {
-        return y < this.getMinBuildHeight() || y >= this.getMaxBuildHeight();
     }
     
     default int getSectionIndex(int y) {

@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.blackgear.offlimits.forge.mixin",
+  "package": "com.blackgear.offlimits.core.forge.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
   ],

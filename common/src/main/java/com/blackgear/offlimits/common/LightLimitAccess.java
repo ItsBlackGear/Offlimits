@@ -1,17 +1,21 @@
 package com.blackgear.offlimits.common;
 
-import com.blackgear.offlimits.Offlimits;
-
-public interface LightLimitAccess {
-    default int getLightSectionCount() {
-        return Offlimits.INSTANCE.getSectionsCount() + 2;
+public class LightLimitAccess {
+    private final HeightLimitAccess level;
+    
+    public LightLimitAccess(HeightLimitAccess level) {
+        this.level = level;
     }
     
-    default int getMinLightSection() {
-        return Offlimits.INSTANCE.getMinSection() - 1;
+    public int getLightSectionCount() {
+        return this.level.getSectionsCount() + 2;
     }
     
-    default int getMaxLightSection() {
+    public int getMinLightSection() {
+        return this.level.getMinSection() - 1;
+    }
+    
+    public int getMaxLightSection() {
         return this.getMinLightSection() + getLightSectionCount();
     }
 }
