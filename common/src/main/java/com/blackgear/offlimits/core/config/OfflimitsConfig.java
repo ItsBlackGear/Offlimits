@@ -1,12 +1,13 @@
 package com.blackgear.offlimits.core.config;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import com.blackgear.offlimits.Offlimits;
+import me.shedaniel.autoconfig.ConfigData;
+import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
-public class OfflimitsConfig {
-    public static final int MAX_BUILD_HEIGHT = getMaxBuildHeight();
-    
-    @ExpectPlatform
-    public static int getMaxBuildHeight() {
-        throw new AssertionError();
-    }
+@Config(name = Offlimits.MOD_ID)
+public class OfflimitsConfig implements ConfigData {
+    @ConfigEntry.Gui.Tooltip
+    @ConfigEntry.BoundedDiscrete(min = 256, max = 512)
+    public int maxBuildHeight = 320;
 }

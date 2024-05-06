@@ -1,16 +1,18 @@
 package com.blackgear.offlimits.forge;
 
 import com.blackgear.offlimits.Offlimits;
-import com.blackgear.offlimits.core.config.forge.OfflimitsForgeConfig;
+import com.blackgear.offlimits.core.config.OfflimitsConfig;
+import me.shedaniel.autoconfig.AutoConfig;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 
 @Mod(Offlimits.MOD_ID)
 public class OfflimitsForge {
     public OfflimitsForge() {
         Offlimits.init();
-        
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, OfflimitsForgeConfig.SPEC, "offlimits.toml");
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, screen) -> {
+            return AutoConfig.getConfigScreen(OfflimitsConfig.class, screen).get();
+        });
     }
 }

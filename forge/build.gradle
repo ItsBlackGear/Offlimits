@@ -23,8 +23,7 @@ configurations {
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
 
-    modImplementation "curse.maven:configured-457570:4462830"
-    modImplementation "curse.maven:catalogue-459701:3780550"
+    modApi ("me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_version}")
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
