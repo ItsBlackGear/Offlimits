@@ -4,10 +4,10 @@
   "package": "com.blackgear.offlimits.core.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "sodium.ChunkRenderColumnMixin",
-    "sodium.ChunkRenderManagerMixin"
   ],
   "client": [
+    "sodium.ChunkRenderColumnMixin",
+    "sodium.ChunkRenderManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
