@@ -6,6 +6,6 @@ import net.fabricmc.api.ModInitializer;
 public class OfflimitsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        Offlimits.init();
+        Offlimits.bootstrap();
     }
 }

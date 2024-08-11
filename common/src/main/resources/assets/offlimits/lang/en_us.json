@@ -1,6 +1,0 @@
-{
-  "text.autoconfig.offlimits.title": "Offlimits",
-
-  "text.autoconfig.offlimits.option.maxBuildHeight": "The maximum build height for the world.",
-  "text.autoconfig.offlimits.option.maxBuildHeight.@Tooltip": "Max Build Height, Restart to apply changes."
-}
