@@ -1,7 +1,7 @@
 package com.blackgear.offlimits;
 
-import com.blackgear.offlimits.common.HeightLimitAccess;
-import com.blackgear.offlimits.common.LightLimitAccess;
+import com.blackgear.offlimits.common.utils.HeightLimitAccess;
+import com.blackgear.offlimits.common.utils.LightLimitAccess;
 import com.blackgear.platform.core.Environment;
 import com.blackgear.platform.core.util.config.ModConfig;
 import org.apache.logging.log4j.LogManager;

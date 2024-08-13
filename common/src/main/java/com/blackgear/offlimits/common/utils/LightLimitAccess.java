@@ -1,4 +1,4 @@
-package com.blackgear.offlimits.common;
+package com.blackgear.offlimits.common.utils;
 
 public class LightLimitAccess {
     private final HeightLimitAccess level;
