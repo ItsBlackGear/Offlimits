@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.spongepowered.asm.mixin.Final;
@@ -26,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.BitSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 
 @Mixin(WorldCarver.class)
@@ -34,14 +36,15 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
     @Shadow @Final protected static BlockState AIR;
     
     @Shadow protected abstract boolean canReplaceBlock(BlockState state, BlockState aboveState);
-    
     @Shadow protected abstract boolean carveBlock(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, BlockPos.MutableBlockPos mutableBlockPos3, int i, int j, int k, int l, int m, int n, int o, int p, MutableBoolean mutableBoolean);
-    
     @Shadow protected abstract boolean skip(double d, double e, double f, int i);
+    @Shadow protected abstract boolean hasWater(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n, int o, int p);
     
     @Shadow @Final protected int genHeight;
     
-    @Shadow protected abstract boolean hasWater(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n, int o, int p);
+    @Shadow protected Set<Fluid> liquids;
+    
+    @Shadow protected abstract boolean isEdge(int minX, int maxX, int minZ, int maxZ, int x, int z);
     
     @Unique private Aquifer aquifer;
     
@@ -92,7 +95,7 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
                 int startZ = Math.max(Mth.floor(z - horizontalRadius) - minBlockZ - 1, 0);
                 int endZ = Math.min(Mth.floor(z + horizontalRadius) - minBlockZ, 15);
                 
-                if (!Offlimits.CONFIG.areAquifersEnabled.get() && this.hasWater(chunk, chunkX, chunkZ, startX, endX, startY, endY, startZ, endZ)) {
+                if (!Offlimits.CONFIG.areAquifersEnabled.get() && this.hasDisallowedLiquid(chunk, startX, endX, startY, endY, startZ, endZ)) {
                     callback.setReturnValue(false);
                 } else {
                     boolean carved = false;
@@ -205,5 +208,31 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
             BlockState state = aquifer.computeState(new SimpleStoneSource(Blocks.STONE), pos.getX(), pos.getY(), pos.getZ(), 0.0);
             return state == Blocks.STONE.defaultBlockState() ? null : state;
         }
+    }
+    
+    @Unique
+    protected boolean hasDisallowedLiquid(ChunkAccess chunk, int startX, int endX, int startY, int endY, int startZ, int endZ) {
+        ChunkPos pos = chunk.getPos();
+        int minX = pos.getMinBlockX();
+        int minZ = pos.getMinBlockZ();
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        
+        for(int x = startX; x <= endX; ++x) {
+            for(int z = startZ; z <= endZ; ++z) {
+                for(int y = startY - 1; y <= endY + 1; ++y) {
+                    mutable.set(minX + x, y, minZ + z);
+                    
+                    if (this.liquids.contains(chunk.getFluidState(mutable).getType())) {
+                        return true;
+                    }
+                    
+                    if (y != endY + 1 && !this.isEdge(x, z, startX, endX, startZ, endZ)) {
+                        y = endY;
+                    }
+                }
+            }
+        }
+        
+        return false;
     }
 }

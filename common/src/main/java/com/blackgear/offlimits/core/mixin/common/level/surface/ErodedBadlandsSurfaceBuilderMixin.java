@@ -44,8 +44,8 @@ public class ErodedBadlandsSurfaceBuilderMixin extends BadlandsSurfaceBuilder {
         int z,
         int startHeight,
         double surfaceNoise,
-        BlockState blockState,
-        BlockState blockState2,
+        BlockState defaultBlock,
+        BlockState defaultFluid,
         int seaLevel,
         long seed,
         SurfaceBuilderConfiguration config,
@@ -54,7 +54,7 @@ public class ErodedBadlandsSurfaceBuilderMixin extends BadlandsSurfaceBuilder {
         if (Offlimits.CONFIG.allowTerrainModifications.get()) {
             double noise = 0.0;
             double pillarNoise = Math.min(Math.abs(surfaceNoise), this.pillarNoise.getValue((double)x * 0.25, (double)z * 0.25, false) * 15.0);
-            
+
             if (pillarNoise > 0.0) {
                 double scale = 0.001953125;
                 double pillarRoofNoise = Math.abs(this.pillarRoofNoise.getValue((double)x * scale, (double)z * scale, false));
@@ -63,10 +63,10 @@ public class ErodedBadlandsSurfaceBuilderMixin extends BadlandsSurfaceBuilder {
                 if (noise > offset) {
                     noise = offset;
                 }
-                
+
                 noise += 64.0;
             }
-            
+
             int localX = x & 15;
             int localZ = z & 15;
             BlockState currentState = WHITE_TERRACOTTA;
@@ -74,61 +74,62 @@ public class ErodedBadlandsSurfaceBuilderMixin extends BadlandsSurfaceBuilder {
             BlockState underMaterial = configuration.getUnderMaterial();
             BlockState topMaterial = configuration.getTopMaterial();
             BlockState currentMaterial = underMaterial;
-            
+
             int factor = (int)(surfaceNoise / 3.0 + 3.0 + random.nextDouble() * 0.25);
             boolean isPositiveNoise = Math.cos(surfaceNoise / 3.0 * Math.PI) > 0.0;
             int depth = -1;
             boolean isTopMaterial = false;
             BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-            
+
             for(int y = Math.max(startHeight, (int) noise + 1); y >= ((BiomeExtension) biome).getPreliminarySurfaceLevel(); --y) {
                 mutable.set(localX, y, localZ);
                 if (chunk.getBlockState(mutable).isAir() && y < (int) noise) {
-                    chunk.setBlockState(mutable, blockState, false);
+                    chunk.setBlockState(mutable, defaultBlock, false);
                 }
-                
+
                 BlockState localState = chunk.getBlockState(mutable);
-                
+
                 if (localState.isAir()) {
                     depth = -1;
-                } else if (localState.is(blockState.getBlock())) {
-                    
+                } else if (localState.is(defaultBlock.getBlock())) {
+
                     if (depth == -1) {
                         isTopMaterial = false;
-                        
+
                         if (factor <= 0) {
                             currentState = Blocks.AIR.defaultBlockState();
-                            currentMaterial = blockState;
+                            currentMaterial = defaultBlock;
                         } else if (y >= seaLevel - 4 && y <= seaLevel + 1) {
                             currentState = WHITE_TERRACOTTA;
                             currentMaterial = underMaterial;
                         }
-                        
+
                         if (y < seaLevel && (currentState == null || currentState.isAir())) {
-                            currentState = blockState2;
+                            currentState = defaultFluid;
                         }
-                        
+
                         depth = factor + Math.max(0, y - seaLevel);
-                        
                         if (y >= seaLevel - 1) {
+
                             if (y > seaLevel + 3 + factor) {
-                                BlockState blockState8;
+                                BlockState bandState;
+
                                 if (y < 64 || y > 127) {
-                                    blockState8 = ORANGE_TERRACOTTA;
+                                    bandState = ORANGE_TERRACOTTA;
                                 } else if (isPositiveNoise) {
-                                    blockState8 = TERRACOTTA;
+                                    bandState = TERRACOTTA;
                                 } else {
-                                    blockState8 = this.getBand(x, y, z);
+                                    bandState = this.getBand(x, y, z);
                                 }
-                                
-                                chunk.setBlockState(mutable, blockState8, false);
+
+                                chunk.setBlockState(mutable, bandState, false);
                             } else {
                                 chunk.setBlockState(mutable, topMaterial, false);
                                 isTopMaterial = true;
                             }
                         } else {
                             chunk.setBlockState(mutable, currentMaterial, false);
-                            
+
                             if (currentMaterial.is(Blocks.WHITE_TERRACOTTA)
                                 || currentMaterial.is(Blocks.ORANGE_TERRACOTTA)
                                 || currentMaterial.is(Blocks.MAGENTA_TERRACOTTA)
@@ -150,7 +151,7 @@ public class ErodedBadlandsSurfaceBuilderMixin extends BadlandsSurfaceBuilder {
                         }
                     } else if (depth > 0) {
                         --depth;
-                        
+
                         if (isTopMaterial) {
                             chunk.setBlockState(mutable, ORANGE_TERRACOTTA, false);
                         } else {
@@ -159,7 +160,7 @@ public class ErodedBadlandsSurfaceBuilderMixin extends BadlandsSurfaceBuilder {
                     }
                 }
             }
-            
+
             callback.cancel();
         }
     }
