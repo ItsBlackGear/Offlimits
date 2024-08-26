@@ -15,6 +15,10 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import java.util.Arrays;
 
 public interface Aquifer {
+    BlockState AIR = Blocks.AIR.defaultBlockState();
+    BlockState WATER = Blocks.WATER.defaultBlockState();
+    BlockState LAVA = Blocks.LAVA.defaultBlockState();
+
     static Aquifer create(
         ChunkPos pos,
         NormalNoise barrierNoise,
@@ -34,7 +38,7 @@ public interface Aquifer {
                 if (density > 0.0) {
                     return source.getBaseBlock(x, y, z);
                 } else {
-                    return y >= seaLevel ? Blocks.AIR.defaultBlockState() : fillState;
+                    return y >= seaLevel ? AIR : fillState;
                 }
             }
             
@@ -55,13 +59,17 @@ public interface Aquifer {
         private static final int X_SPACING = 16;
         private static final int Y_SPACING = 12;
         private static final int Z_SPACING = 16;
+        
         private final NormalNoise barrierNoise;
         private final NormalNoise waterLevelNoise;
         private final NormalNoise lavaNoise;
         private final NoiseGeneratorSettings noiseGeneratorSettings;
+        
         private final AquiferStatus[] aquiferCache;
         private final long[] aquiferLocationCache;
         private boolean shouldScheduleFluidUpdate;
+        
+        private final WorldgenRandom random = new WorldgenRandom();
         private final NoiseSampler sampler;
         private final int minGridX;
         private final int minGridY;
@@ -82,17 +90,22 @@ public interface Aquifer {
             this.barrierNoise = barrierNoise;
             this.waterLevelNoise = waterLevelNoise;
             this.lavaNoise = lavaNoise;
+            
             this.noiseGeneratorSettings = settings;
             this.sampler = sampler;
+            
             this.minGridX = this.gridX(pos.getMinBlockX()) - 1;
             int gridX = this.gridX(pos.getMaxBlockX()) + 1;
             this.gridSizeX = gridX - this.minGridX + 1;
+            
             this.minGridY = this.gridY(minY) - 1;
             int gridY = this.gridY(minY + chunkCountY) + 1;
             int gridSizeY = gridY - this.minGridY + 1;
+            
             this.minGridZ = this.gridZ(pos.getMinBlockZ()) - 1;
             int gridZ = this.gridZ(pos.getMaxBlockZ()) + 1;
             this.gridSizeZ = gridZ - this.minGridZ + 1;
+            
             int gridSize = this.gridSizeX * gridSizeY * this.gridSizeZ;
             this.aquiferCache = new Aquifer.NoiseBasedAquifer.AquiferStatus[gridSize];
             this.aquiferLocationCache = new long[gridSize];
@@ -113,101 +126,105 @@ public interface Aquifer {
                 BlockState fluidType;
                 
                 if (this.isLavaLevel(y)) {
-                    fluidType = Blocks.LAVA.defaultBlockState();
+                    fluidType = LAVA;
                     barrierDensity = 0.0;
                     this.shouldScheduleFluidUpdate = false;
                 } else {
+                    // Precompute values that remain constant for the loop iterations
                     int gridX = Math.floorDiv(x - 5, X_SPACING);
                     int gridY = Math.floorDiv(y + 1, Y_SPACING);
                     int gridZ = Math.floorDiv(z - 5, Z_SPACING);
                     
-                    int firstDistance2 = Integer.MAX_VALUE;
-                    int secondDistance2 = Integer.MAX_VALUE;
-                    int thirdDistance2 = Integer.MAX_VALUE;
+                    int[] distances = {Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
+                    long[] sources = {0L, 0L, 0L};
                     
-                    long firstSource = 0L;
-                    long secondSource = 0L;
-                    long thirdSource = 0L;
+                    // Cache variables for reuse
+                    int localX, localY, localZ, deltaX, deltaY, deltaZ, distance;
+                    long sourcePos;
                     
-                    WorldgenRandom random = new WorldgenRandom();
                     for (int offsetX = 0; offsetX <= 1; ++offsetX) {
                         for (int offsetY = -1; offsetY <= 1; ++offsetY) {
                             for (int offsetZ = 0; offsetZ <= 1; ++offsetZ) {
-                                
-                                int localX = gridX + offsetX;
-                                int localY = gridY + offsetY;
-                                int localZ = gridZ + offsetZ;
+                                localX = gridX + offsetX;
+                                localY = gridY + offsetY;
+                                localZ = gridZ + offsetZ;
                                 
                                 int index = this.getIndex(localX, localY, localZ);
                                 long cache = this.aquiferLocationCache[index];
-                                long sourcePos;
                                 
                                 if (cache != Long.MAX_VALUE) {
                                     sourcePos = cache;
                                 } else {
-                                    random.setSeed(Mth.getSeed(localX, localY * 3, localZ) + 1L);
+                                    this.random.setSeed(Mth.getSeed(localX, localY * 3, localZ) + 1L);
                                     sourcePos = BlockPos.asLong(
-                                        localX * X_SPACING + random.nextInt(X_RANGE),
-                                        localY * Y_SPACING + random.nextInt(Y_RANGE),
-                                        localZ * Z_SPACING + random.nextInt(Z_RANGE)
+                                        localX * X_SPACING + this.random.nextInt(X_RANGE),
+                                        localY * Y_SPACING + this.random.nextInt(Y_RANGE),
+                                        localZ * Z_SPACING + this.random.nextInt(Z_RANGE)
                                     );
                                     this.aquiferLocationCache[index] = sourcePos;
                                 }
                                 
-                                int deltaX = BlockPos.getX(sourcePos) - x;
-                                int deltaY = BlockPos.getY(sourcePos) - y;
-                                int deltaZ = BlockPos.getZ(sourcePos) - z;
+                                deltaX = BlockPos.getX(sourcePos) - x;
+                                deltaY = BlockPos.getY(sourcePos) - y;
+                                deltaZ = BlockPos.getZ(sourcePos) - z;
                                 
-                                int distance2 = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+                                distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
                                 
-                                if (firstDistance2 >= distance2) {
-                                    thirdSource = secondSource;
-                                    secondSource = firstSource;
-                                    firstSource = sourcePos;
-                                    thirdDistance2 = secondDistance2;
-                                    secondDistance2 = firstDistance2;
-                                    firstDistance2 = distance2;
-                                } else if (secondDistance2 >= distance2) {
-                                    thirdSource = secondSource;
-                                    secondSource = sourcePos;
-                                    thirdDistance2 = secondDistance2;
-                                    secondDistance2 = distance2;
-                                } else if (thirdDistance2 >= distance2) {
-                                    thirdSource = sourcePos;
-                                    thirdDistance2 = distance2;
+                                if (distance < distances[0]) {
+                                    sources[2] = sources[1];
+                                    sources[1] = sources[0];
+                                    sources[0] = sourcePos;
+                                    distances[2] = distances[1];
+                                    distances[1] = distances[0];
+                                    distances[0] = distance;
+                                } else if (distance < distances[1]) {
+                                    sources[2] = sources[1];
+                                    sources[1] = sourcePos;
+                                    distances[2] = distances[1];
+                                    distances[1] = distance;
+                                } else if (distance < distances[2]) {
+                                    sources[2] = sourcePos;
+                                    distances[2] = distance;
                                 }
                             }
                         }
                     }
                     
-                    AquiferStatus firstAquifer = this.getAquiferStatus(firstSource);
-                    AquiferStatus secondAquifer = this.getAquiferStatus(secondSource);
-                    AquiferStatus thirdAquifer = this.getAquiferStatus(thirdSource);
+                    AquiferStatus[] aquifers = {
+                        this.getAquiferStatus(sources[0]),
+                        this.getAquiferStatus(sources[1]),
+                        this.getAquiferStatus(sources[2])
+                    };
                     
-                    double firstToSecond = this.similarity(firstDistance2, secondDistance2);
-                    double firstToThird = this.similarity(firstDistance2, thirdDistance2);
-                    double secondToThird = this.similarity(secondDistance2, thirdDistance2);
+                    double[] similarities = {
+                        this.similarity(distances[0], distances[1]),
+                        this.similarity(distances[0], distances[2]),
+                        this.similarity(distances[1], distances[2])
+                    };
                     
-                    this.shouldScheduleFluidUpdate = firstToSecond > 0.0;
+                    this.shouldScheduleFluidUpdate = similarities[0] > 0.0;
                     
-                    if (firstAquifer.fluidLevel >= y && firstAquifer.fluidType.is(Blocks.WATER) && this.isLavaLevel(y - 1)) {
+                    if (aquifers[0].fluidLevel >= y && aquifers[0].fluidType.is(Blocks.WATER) && this.isLavaLevel(y - 1)) {
                         barrierDensity = 1.0;
-                    } else if (firstToSecond > -1.0) {
+                    } else if (similarities[0] > -1.0) {
                         double substance = 1.0 + (this.barrierNoise.getValue(x, y, z) + 0.05) / 4.0;
                         
-                        double firstToSecondPressure = this.calculatePressure(y, substance, firstAquifer, secondAquifer);
-                        double firstToThirdPressure = this.calculatePressure(y, substance, firstAquifer, thirdAquifer);
-                        double secondToThirdPressure = this.calculatePressure(y, substance, secondAquifer, thirdAquifer);
+                        // Precompute pressure values to avoid multiple calls
+                        double[] pressures = {
+                            this.calculatePressure(y, substance, aquifers[0], aquifers[1]),
+                            this.calculatePressure(y, substance, aquifers[0], aquifers[2]),
+                            this.calculatePressure(y, substance, aquifers[1], aquifers[2])
+                        };
                         
-                        double firstToSecondFactor = Math.max(0.0, firstToSecond);
-                        double firstToThirdFactor = Math.max(0.0, firstToThird);
-                        double secondToThirdFactor = Math.max(0.0, secondToThird);
+                        double[] factors = {
+                            Math.max(0.0, similarities[0]),
+                            Math.max(0.0, similarities[1]),
+                            Math.max(0.0, similarities[2])
+                        };
                         
-                        double pressure = 2.0 * firstToSecondFactor * Math.max(firstToSecondPressure, Math.max(firstToThirdPressure * firstToThirdFactor, secondToThirdPressure * secondToThirdFactor));
-                        if (y <= firstAquifer.fluidLevel
-                            && y <= secondAquifer.fluidLevel
-                            && firstAquifer.fluidLevel != secondAquifer.fluidLevel
-                            && Math.abs(this.barrierNoise.getValue((float)x * 0.5F, (float)y * 0.5F, (float)z * 0.5F)) < 0.3) {
+                        double pressure = 2.0 * factors[0] * Math.max(pressures[0], Math.max(pressures[1] * factors[1], pressures[2] * factors[2]));
+                        
+                        if (y <= aquifers[0].fluidLevel && y <= aquifers[1].fluidLevel && aquifers[0].fluidLevel != aquifers[1].fluidLevel && Math.abs(this.barrierNoise.getValue(x * 0.5F, y * 0.5F, z * 0.5F)) < 0.3) {
                             barrierDensity = 1.0;
                         } else {
                             barrierDensity = Math.max(0.0, pressure);
@@ -216,7 +233,7 @@ public interface Aquifer {
                         barrierDensity = 0.0;
                     }
                     
-                    fluidType = y > firstAquifer.fluidLevel ? Blocks.AIR.defaultBlockState() : firstAquifer.fluidType;
+                    fluidType = y > aquifers[0].fluidLevel ? AIR : aquifers[0].fluidType;
                 }
                 
                 if (density + barrierDensity <= 0.0) {
@@ -290,7 +307,7 @@ public interface Aquifer {
             int surfaceLevel = this.sampler.getPreliminarySurfaceLevel(x, y, z);
             
             if (surfaceLevel < fluidLevel && y > surfaceLevel - 8) {
-                return new AquiferStatus(fluidLevel, Blocks.WATER.defaultBlockState());
+                return new AquiferStatus(fluidLevel, WATER);
             } else {
                 double waterLevelNoise = this.waterLevelNoise.getValue(Math.floorDiv(x, 64), (double) Math.floorDiv(y, 40) / 1.4, Math.floorDiv(z, 64)) * 30.0 - 10.0;
                 boolean isLava = false;
@@ -306,18 +323,18 @@ public interface Aquifer {
                     isLava = Math.abs(lavaNoise) > 0.22F;
                 }
                 
-                return new AquiferStatus(Math.min(surfaceLevel - 8, fluidSurfaceLevel), isLava ? Blocks.LAVA.defaultBlockState() : Blocks.WATER.defaultBlockState());
+                return new AquiferStatus(Math.min(surfaceLevel - 8, fluidSurfaceLevel), isLava ? LAVA : WATER);
             }
         }
+    }
+    
+    final class AquiferStatus {
+        final int fluidLevel;
+        final BlockState fluidType;
         
-        static final class AquiferStatus {
-            final int fluidLevel;
-            final BlockState fluidType;
-            
-            public AquiferStatus(int fluidLevel, BlockState fluidType) {
-                this.fluidLevel = fluidLevel;
-                this.fluidType = fluidType;
-            }
+        public AquiferStatus(int fluidLevel, BlockState fluidType) {
+            this.fluidLevel = fluidLevel;
+            this.fluidType = fluidType;
         }
     }
 }

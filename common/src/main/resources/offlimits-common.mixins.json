@@ -17,6 +17,7 @@
     "common.level.chunk.ChunkSerializerMixin",
     "common.level.chunk.LevelChunkMixin",
     "common.level.chunk.NoiseBasedChunkGeneratorMixin",
+    "common.level.chunk.PalettedContainerMixin",
     "common.level.chunk.ProtoChunkMixin",
     "common.level.chunk.ProtoTickListMixin",
     "common.level.chunk.SectionStorageMixin",

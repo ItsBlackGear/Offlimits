@@ -1,3 +1,4 @@
 accessWidener   v2  named
 
 extendable class net/minecraft/world/level/biome/Biome
+accessible class net/minecraft/world/level/chunk/PaletteResize
