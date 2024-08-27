@@ -4,6 +4,7 @@ import com.blackgear.platform.core.util.config.ConfigBuilder;
 
 public class OfflimitsConfig {
     public final ConfigBuilder.ConfigValue<Integer> maxBuildHeight;
+    public final ConfigBuilder.ConfigValue<Integer> minBuildHeight;
     
     public final ConfigBuilder.ConfigValue<Boolean> allowTerrainModifications;
     public final ConfigBuilder.ConfigValue<Boolean> areNoiseCavesEnabled;
@@ -13,6 +14,7 @@ public class OfflimitsConfig {
     public OfflimitsConfig(ConfigBuilder builder) {
         builder.push("height");
             this.maxBuildHeight = builder.comment("The maximum build height for the world.").defineInRange("maxBuildHeight", 320, 256, 512);
+            this.minBuildHeight = builder.comment("The minimum build height for the world.").defineInRange("minBuildHeight", -64, -128, 0);
         builder.pop();
         
         builder.push("terrain");

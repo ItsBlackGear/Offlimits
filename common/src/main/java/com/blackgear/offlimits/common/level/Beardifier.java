@@ -1,5 +1,6 @@
 package com.blackgear.offlimits.common.level;
 
+import com.blackgear.offlimits.Offlimits;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
@@ -44,7 +45,7 @@ public class Beardifier {
         this.rigids = new ObjectArrayList<>(10);
         
         for(StructureFeature<?> structureFeature : StructureFeature.NOISE_AFFECTING_FEATURES) {
-            featureManager.startsForFeature(SectionPos.of(pos, 0), structureFeature).forEach(structureStart -> {
+            featureManager.startsForFeature(SectionPos.of(pos, Offlimits.INSTANCE.getMinSection()), structureFeature).forEach(structureStart -> {
                 for(StructurePiece structurePiece : structureStart.getPieces()) {
                     if (structurePiece.isCloseToChunk(pos, 12)) {
                         if (structurePiece instanceof PoolElementStructurePiece) {

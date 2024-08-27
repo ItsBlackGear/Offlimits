@@ -1,11 +1,13 @@
 package com.blackgear.offlimits.common.level.noise;
 
+import com.blackgear.offlimits.Offlimits;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 
 public class NoiseInterpolator {
     private double[][] slice0, slice1;
-    private final int cellCountZ;
+    private final int cellCountY, cellCountZ;
+    private final int cellNoiseMinY;
     private final NoiseColumnFiller noiseColumnFiller;
     private double noise000, noise001, noise100, noise101, noise010, noise011, noise110, noise111;
     private double valueXZ00, valueXZ10, valueXZ01, valueXZ11;
@@ -13,7 +15,13 @@ public class NoiseInterpolator {
     private final int firstCellXInChunk, firstCellZInChunk;
     
     public NoiseInterpolator(int cellCountX, int cellCountY, int cellCountZ, ChunkPos chunkPos, NoiseColumnFiller noiseColumnFiller) {
+        this(cellCountX, cellCountY, cellCountZ, chunkPos, Offlimits.INSTANCE.getMinBuildHeight(), noiseColumnFiller);
+    }
+    
+    public NoiseInterpolator(int cellCountX, int cellCountY, int cellCountZ, ChunkPos chunkPos, int cellNoiseMinY, NoiseColumnFiller noiseColumnFiller) {
+        this.cellCountY = cellCountY;
         this.cellCountZ = cellCountZ;
+        this.cellNoiseMinY = cellNoiseMinY;
         this.noiseColumnFiller = noiseColumnFiller;
         this.slice0 = allocateSlice(cellCountY, cellCountZ);
         this.slice1 = allocateSlice(cellCountY, cellCountZ);
@@ -44,7 +52,7 @@ public class NoiseInterpolator {
     private void fillSlice(double[][] slice, int cellX) {
         for(int noiseZ = 0; noiseZ < this.cellCountZ + 1; ++noiseZ) {
             int cellZ = this.firstCellZInChunk + noiseZ;
-            this.noiseColumnFiller.fillNoiseColumn(slice[noiseZ], cellX, cellZ);
+            this.noiseColumnFiller.fillNoiseColumn(slice[noiseZ], cellX, cellZ, this.cellNoiseMinY, this.cellCountY);
         }
     }
     
@@ -83,6 +91,6 @@ public class NoiseInterpolator {
     
     @FunctionalInterface
     public interface NoiseColumnFiller {
-        void fillNoiseColumn(double[] slices, int x, int z);
+        void fillNoiseColumn(double[] slices, int x, int z, int cellNoiseMinY, int cellCountY);
     }
 }

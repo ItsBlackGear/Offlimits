@@ -39,7 +39,7 @@ public interface HeightLimitAccess {
         return new HeightLimitAccess() {
             @Override
             public int getHeight() {
-                return height;
+                return height - minBuildHeight;
             }
             
             @Override

@@ -1,6 +1,7 @@
 package com.blackgear.offlimits.core.mixin.common.level;
 
 import com.blackgear.offlimits.Offlimits;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelReader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -15,12 +16,12 @@ public interface LevelReaderMixin {
      * @reason we cannot modify the constant in an interface.
      */
     @Overwrite @Deprecated
-    default boolean hasChunksAt(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        if (maxY >= Offlimits.INSTANCE.getMinBuildHeight() && minY < Offlimits.INSTANCE.getMaxBuildHeight()) {
-            minX >>= 4;
-            minZ >>= 4;
-            maxX >>= 4;
-            maxZ >>= 4;
+    default boolean hasChunksAt(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
+        if (toY >= Offlimits.INSTANCE.getMinBuildHeight() && fromY < Offlimits.INSTANCE.getMaxBuildHeight()) {
+            int minX = SectionPos.blockToSectionCoord(fromX);
+            int minZ = SectionPos.blockToSectionCoord(fromZ);
+            int maxX = SectionPos.blockToSectionCoord(toX);
+            int maxZ = SectionPos.blockToSectionCoord(toZ);
             
             for(int x = minX; x <= maxX; ++x) {
                 for(int z = minZ; z <= maxZ; ++z) {

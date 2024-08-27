@@ -6,8 +6,6 @@
   "mixins": [
   ],
   "client": [
-    "sodium.ChunkRenderColumnMixin",
-    "sodium.ChunkRenderManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -17,13 +17,13 @@ public class NoodleCaveNoiseModifier implements NoiseModifier {
     
     private final NoodleCavifier cavifier;
     
-    public NoodleCaveNoiseModifier(ChunkPos pos, int chunkCountX, int chunkCountY, int chunkCountZ, NoodleCavifier cavifier) {
+    public NoodleCaveNoiseModifier(ChunkPos pos, int chunkCountX, int chunkCountY, int chunkCountZ, NoodleCavifier cavifier, int cellNoiseMinY) {
         this.cavifier = cavifier;
         
-        this.toggle = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cavifier::fillToggleNoiseColumn);
-        this.thickness = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cavifier::fillThicknessNoiseColumn);
-        this.ridgeA = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cavifier::fillRidgeANoiseColumn);
-        this.ridgeB = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cavifier::fillRidgeBNoiseColumn);
+        this.toggle = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cellNoiseMinY, cavifier::fillToggleNoiseColumn);
+        this.thickness = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cellNoiseMinY, cavifier::fillThicknessNoiseColumn);
+        this.ridgeA = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cellNoiseMinY, cavifier::fillRidgeANoiseColumn);
+        this.ridgeB = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cellNoiseMinY, cavifier::fillRidgeBNoiseColumn);
     }
     
     public NoiseModifier prepare(double factorZ) {
@@ -37,7 +37,7 @@ public class NoodleCaveNoiseModifier implements NoiseModifier {
         double thickness = this.thickness.calculateValue(this.factorZ);
         double ridgeA = this.ridgeA.calculateValue(this.factorZ);
         double ridgeB = this.ridgeB.calculateValue(this.factorZ);
-        return this.cavifier.noodleCavify(density, x, y, z, toggle, thickness, ridgeA, ridgeB);
+        return this.cavifier.noodleCavify(density, x, y, z, toggle, thickness, ridgeA, ridgeB, Offlimits.INSTANCE.getMinBuildHeight());
     }
     
     public void listInterpolators(Consumer<NoiseInterpolator> consumer) {

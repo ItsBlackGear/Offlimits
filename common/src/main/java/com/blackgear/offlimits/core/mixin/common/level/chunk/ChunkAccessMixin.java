@@ -3,6 +3,7 @@ package com.blackgear.offlimits.core.mixin.common.level.chunk;
 import com.blackgear.offlimits.Offlimits;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -10,6 +11,18 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ChunkAccess.class)
 public interface ChunkAccessMixin {
     @Shadow LevelChunkSection[] getSections();
+    
+    @Shadow @Nullable LevelChunkSection getHighestSection();
+    
+    /**
+     * @author
+     * @reason
+     */
+    @Overwrite
+    default int getHighestSectionPosition() {
+        LevelChunkSection levelChunkSection = this.getHighestSection();
+        return levelChunkSection == null ? Offlimits.INSTANCE.getMinBuildHeight() : levelChunkSection.bottomBlockY();
+    }
     
     /**
      * @author ItsBlackGear

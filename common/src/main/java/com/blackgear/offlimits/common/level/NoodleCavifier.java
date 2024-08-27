@@ -1,8 +1,8 @@
 package com.blackgear.offlimits.common.level;
 
-import com.blackgear.offlimits.Offlimits;
 import com.blackgear.offlimits.common.utils.MathUtils;
 import com.blackgear.offlimits.common.utils.NoiseUtils;
+import com.blackgear.offlimits.common.utils.SimpleRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import java.util.Random;
@@ -18,38 +18,32 @@ public class NoodleCavifier {
     private final NormalNoise noodleANoiseSource;
     private final NormalNoise noodleBNoiseSource;
     
-    private final int minY;
-    private final int chunkCountY;
-    
-    public NoodleCavifier(int chunkCountY, long seed) {
-        this.minY = Offlimits.INSTANCE.getMinBuildHeight();
-        this.chunkCountY = chunkCountY;
-        
+    public NoodleCavifier(long seed) {
         Random random = new Random(seed);
-        this.toggleNoiseSource = NoiseUtils.normal(random.nextLong(), -8, 1.0);
-        this.thicknessNoiseSource = NoiseUtils.normal(random.nextLong(), -8, 1.0);
-        this.noodleANoiseSource = NoiseUtils.normal(random.nextLong(), -7, 1.0);
-        this.noodleBNoiseSource = NoiseUtils.normal(random.nextLong(), -7, 1.0);
+        this.toggleNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
+        this.thicknessNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
+        this.noodleANoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 1.0);
+        this.noodleBNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 1.0);
     }
     
-    public void fillToggleNoiseColumn(double[] slices, int x, int z) {
-        this.fillNoiseColumn(slices, x, z, this.toggleNoiseSource, 1.0);
+    public void fillToggleNoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY) {
+        this.fillNoiseColumn(slices, x, z, minY, chunkCountY, this.toggleNoiseSource, 1.0);
     }
     
-    public void fillThicknessNoiseColumn(double[] slices, int x, int z) {
-        this.fillNoiseColumn(slices, x, z, this.thicknessNoiseSource, 1.0);
+    public void fillThicknessNoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY) {
+        this.fillNoiseColumn(slices, x, z, minY, chunkCountY, this.thicknessNoiseSource, 1.0);
     }
     
-    public void fillRidgeANoiseColumn(double[] slices, int x, int z) {
-        this.fillNoiseColumn(slices, x, z, this.minY, this.chunkCountY, this.noodleANoiseSource, XZ_FREQUENCY, Y_FREQUENCY);
+    public void fillRidgeANoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY) {
+        this.fillNoiseColumn(slices, x, z, minY, chunkCountY, this.noodleANoiseSource, XZ_FREQUENCY, Y_FREQUENCY);
     }
     
-    public void fillRidgeBNoiseColumn(double[] slices, int x, int z) {
-        this.fillNoiseColumn(slices, x, z, this.minY, this.chunkCountY, this.noodleBNoiseSource, XZ_FREQUENCY, Y_FREQUENCY);
+    public void fillRidgeBNoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY) {
+        this.fillNoiseColumn(slices, x, z, minY, chunkCountY, this.noodleBNoiseSource, XZ_FREQUENCY, Y_FREQUENCY);
     }
     
-    private void fillNoiseColumn(double[] slices, int x, int z, NormalNoise noiseSource, double frequency) {
-        this.fillNoiseColumn(slices, x, z, this.minY, this.chunkCountY, noiseSource, frequency, frequency);
+    private void fillNoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY, NormalNoise noiseSource, double frequency) {
+        this.fillNoiseColumn(slices, x, z, minY, chunkCountY, noiseSource, frequency, frequency);
     }
     
     private void fillNoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY, NormalNoise noiseSource, double xzFrequency, double yFrequency) {
@@ -67,8 +61,8 @@ public class NoodleCavifier {
         }
     }
     
-    public double noodleCavify(double density, int x, int y, int z, double toggle, double thickness, double ridgeA, double ridgeB) {
-        if (y > NOODLES_MAX_Y || y < this.minY + 4 || density < 0.0 || toggle < 0.0) {
+    public double noodleCavify(double density, int x, int y, int z, double toggle, double thickness, double ridgeA, double ridgeB, int minY) {
+        if (y > NOODLES_MAX_Y || y < minY + 4 || density < 0.0 || toggle < 0.0) {
             return density;
         }
         

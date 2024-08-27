@@ -14,6 +14,7 @@ import com.blackgear.offlimits.common.level.noiseModifiers.NoodleCaveNoiseModifi
 import com.blackgear.offlimits.common.level.surface.BiomeExtension;
 import com.blackgear.offlimits.common.level.surface.WorldCarverExtension;
 import com.blackgear.offlimits.common.utils.NoiseUtils;
+import com.blackgear.offlimits.common.utils.SimpleRandom;
 import com.blackgear.offlimits.core.mixin.common.ConfiguredWorldCarverAccessor;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
@@ -39,10 +40,10 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.DoubleFunction;
 import java.util.function.Predicate;
@@ -66,9 +67,9 @@ public class OfflimitsChunkGenerator {
     
     public void initialize(BiomeSource biomeSource, long seed, SimplexNoise islandNoise, PerlinNoise depthNoise) {
         BlendedNoise blendedNoise = new BlendedNoise(this.random);
-        this.barrierNoise = NoiseUtils.normal(this.random.nextLong(), -3, 1.0);
-        this.waterLevelNoise = NoiseUtils.normal(this.random.nextLong(), -3, 1.0, 0.0, 2.0);
-        this.lavaNoise = NoiseUtils.normal(this.random.nextLong(), -1, 1.0, 0.0);
+        this.barrierNoise = NoiseUtils.normal(new SimpleRandom(this.random.nextLong()), -3, 1.0);
+        this.waterLevelNoise = NoiseUtils.normal(new SimpleRandom(this.random.nextLong()), -3, 1.0, 0.0, 2.0);
+        this.lavaNoise = NoiseUtils.normal(new SimpleRandom(this.random.nextLong()), -1, 1.0, 0.0);
         
         NoiseModifier caveNoiseModifier;
         if (Offlimits.CONFIG.areNoiseCavesEnabled.get()) {
@@ -78,7 +79,7 @@ public class OfflimitsChunkGenerator {
         }
         
         this.sampler = new NoiseSampler(biomeSource, this.context.chunkWidth(), this.context.chunkHeight(), this.context.chunkCountY(), this.settings.noiseSettings(), blendedNoise, islandNoise, depthNoise, caveNoiseModifier);
-        this.noodleCavifier = new NoodleCavifier(this.context.chunkCountY(), seed);
+        this.noodleCavifier = new NoodleCavifier(seed);
     }
     
     public void buildSurface(WorldGenRegion region, ChunkAccess chunk, SurfaceNoise surfaceNoise) {
@@ -150,13 +151,25 @@ public class OfflimitsChunkGenerator {
         }
     }
     
-    public int iterateNoiseColumn(double[][] slices, int x, int z, double noiseX, double noiseZ, @Nullable BlockState[] states, @Nullable Predicate<BlockState> predicate) {
+    public OptionalInt iterateNoiseColumn(int x, int z, BlockState[] states, Predicate<BlockState> predicate, int minY, int chunkCountY) {
         int chunkX = SectionPos.blockToSectionCoord(x);
         int chunkZ = SectionPos.blockToSectionCoord(z);
+        int o = Math.floorDiv(x, this.context.chunkWidth());
+        int p = Math.floorDiv(z, this.context.chunkWidth());
+        int q = Math.floorMod(x, this.context.chunkWidth());
+        int r = Math.floorMod(z, this.context.chunkWidth());
+        double noiseX = (double)q / (double)this.context.chunkWidth();
+        double noiseZ = (double)r / (double)this.context.chunkWidth();
+        double[][] slices = new double[][] {
+            this.makeAndFillNoiseColumn(o, p, minY, chunkCountY),
+            this.makeAndFillNoiseColumn(o, p + 1, minY, chunkCountY),
+            this.makeAndFillNoiseColumn(o + 1, p, minY, chunkCountY),
+            this.makeAndFillNoiseColumn(o + 1, p + 1, minY, chunkCountY)
+        };
         
-        Aquifer aquifer = this.getAquifer(this.context.minY(), this.context.chunkCountY(), new ChunkPos(chunkX, chunkZ));
+        Aquifer aquifer = this.getAquifer(minY, chunkCountY, new ChunkPos(chunkX, chunkZ));
         
-        for(int chunkY = this.context.chunkCountY() - 1; chunkY >= 0; --chunkY) {
+        for(int chunkY = chunkCountY - 1; chunkY >= 0; --chunkY) {
             double noise000 = slices[0][chunkY];
             double noise001 = slices[1][chunkY];
             double noise100 = slices[2][chunkY];
@@ -170,7 +183,7 @@ public class OfflimitsChunkGenerator {
                 double noiseY = (double)i / (double)this.context.chunkHeight();
                 double density = Mth.lerp3(noiseY, noiseX, noiseZ, noise000, noise010, noise100, noise110, noise001, noise011, noise101, noise111);
                 int height = chunkY * this.context.chunkHeight() + i;
-                int y = height + this.context.minY() * this.context.chunkHeight();
+                int y = height + minY * this.context.chunkHeight();
                 BlockState state = this.updateNoiseAndGenerateBaseState(Beardifier.NO_BEARDS, aquifer, NoiseModifier.PASSTHROUGH, x, y, z, density);
                 
                 if (states != null) {
@@ -178,93 +191,89 @@ public class OfflimitsChunkGenerator {
                 }
                 
                 if (predicate != null && predicate.test(state)) {
-                    return y + 1;
+                    return OptionalInt.of(y + 1);
                 }
             }
         }
         
-        return 0;
+        return OptionalInt.empty();
     }
     
-    public void fillNoiseColumn(double[] slices, int x, int z) {
-        this.sampler.fillNoiseColumn(slices, x, z, this.settings.noiseSettings(), this.context.seaLevel(), this.context.minY(), this.context.chunkCountY());
+    public double[] makeAndFillNoiseColumn(int x, int z, int minY, int chunkCountY) {
+        double[] slices = new double[chunkCountY + 1];
+        this.fillNoiseColumn(slices, x, z, minY, chunkCountY);
+        return slices;
     }
     
-    public void fillFromNoise(StructureFeatureManager featureManager, ChunkAccess chunk, int minY, int chunkCountY) {
-        ProtoChunk proto = (ProtoChunk) chunk;
-        Heightmap oceanFloor = proto.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
-        Heightmap worldSurface = proto.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
-        ChunkPos pos = chunk.getPos();
+    public void fillNoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY) {
+        this.sampler.fillNoiseColumn(slices, x, z, this.settings.noiseSettings(), this.context.seaLevel(), minY, chunkCountY);
+    }
+    
+    public void fillFromNoise(StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, int i, int j) {
+        ProtoChunk protoChunk = (ProtoChunk) chunkAccess;
+        Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
+        Heightmap heightmap2 = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
+        ChunkPos chunkPos = chunkAccess.getPos();
+        int k = chunkPos.getMinBlockX();
+        int l = chunkPos.getMinBlockZ();
+        Beardifier beardifier = new Beardifier(structureFeatureManager, chunkAccess);
+        Aquifer aquifer = this.getAquifer(i, j, chunkPos);
+        NoiseInterpolator noiseInterpolator = new NoiseInterpolator(this.context.chunkCountX(), j, this.context.chunkCountZ(), chunkPos, i, this::fillNoiseColumn);
+        List<NoiseInterpolator> list = Lists.newArrayList(noiseInterpolator);
+        Consumer<NoiseInterpolator> consumer = list::add;
+        DoubleFunction<NoiseModifier> caveNoiseModifier = this.createCaveNoiseModifier(i, chunkPos, consumer);
+        list.forEach(NoiseInterpolator::initializeForFirstCellX);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         
-        int minBlockX = pos.getMinBlockX();
-        int minBlockZ = pos.getMinBlockZ();
-        
-        Beardifier beardifier = new Beardifier(featureManager, chunk);
-        Aquifer aquifer = this.getAquifer(Offlimits.INSTANCE.getMinBuildHeight(), this.context.chunkCountY(), pos);
-        NoiseInterpolator interpolator = new NoiseInterpolator(this.context.chunkCountX(), chunkCountY, this.context.chunkCountZ(), pos, this::fillNoiseColumn);
-        List<NoiseInterpolator> interpolators = Lists.newArrayList(interpolator);
-        
-        Consumer<NoiseInterpolator> consumer = interpolators::add;
-        DoubleFunction<NoiseModifier> caveNoiseModifier = this.createCaveNoiseModifier(pos, consumer);
-        
-        interpolators.forEach(NoiseInterpolator::initializeForFirstCellX);
-        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-        
-        for (int noiseX = 0; noiseX < this.context.chunkCountX(); noiseX++) {
-            int cellX = noiseX;
+        for (int m = 0; m < this.context.chunkCountX(); m++) {
+            int n = m;
+            list.forEach(interpolator_ -> interpolator_.advanceCellX(n));
             
-            interpolators.forEach(interpolator_ -> interpolator_.advanceCellX(cellX));
-            
-            for (int noiseZ = 0; noiseZ < this.context.chunkCountZ(); noiseZ++) {
-                LevelChunkSection section = proto.getOrCreateSection(Offlimits.INSTANCE.getSectionsCount() - 1);
+            for (int o = 0; o < this.context.chunkCountZ(); o++) {
+                LevelChunkSection section = protoChunk.getOrCreateSection(Offlimits.INSTANCE.getSectionsCount() - 1);
                 
-                for(int noiseY = chunkCountY - 1; noiseY >= 0; --noiseY) {
-                    int cellY = noiseY;
-                    int cellZ = noiseZ;
+                for(int p = j - 1; p >= 0; --p) {
+                    int q = o;
+                    int r = p;
+                    list.forEach(interpolator_ -> interpolator_.selectCellYZ(r, q));
                     
-                    interpolators.forEach(interpolator_ -> interpolator_.selectCellYZ(cellY, cellZ));
-                    
-                    for(int pieceY = this.context.chunkHeight() - 1; pieceY >= 0; pieceY--) {
-                        int realY = (minY + noiseY) * this.context.chunkHeight() + pieceY;
-                        int localY = realY & 15;
-                        int sectionY = Offlimits.INSTANCE.getSectionIndex(realY);
-                        
-                        if (Offlimits.INSTANCE.getSectionIndex(section.bottomBlockY()) != sectionY) {
-                            section = proto.getOrCreateSection(sectionY);
+                    for(int s = this.context.chunkHeight() - 1; s >= 0; s--) {
+                        int t = (i + p) * this.context.chunkHeight() + s;
+                        int u = t & 15;
+                        int v = Offlimits.INSTANCE.getSectionIndex(t);
+                        if (Offlimits.INSTANCE.getSectionIndex(section.bottomBlockY()) != v) {
+                            section = protoChunk.getOrCreateSection(v);
                         }
                         
-                        double factorY = (double) pieceY / (double) this.context.chunkHeight();
+                        double d = (double) s / (double) this.context.chunkHeight();
+                        list.forEach(interpolator_ -> interpolator_.updateForY(d));
                         
-                        interpolators.forEach(interpolator_ -> interpolator_.updateForY(factorY));
-                        
-                        for(int pieceX = 0; pieceX < this.context.chunkWidth(); pieceX++) {
-                            int realX = minBlockX + noiseX * this.context.chunkWidth() + pieceX;
-                            int localX = realX & 15;
-                            double factorX = (double) pieceX / (double) this.context.chunkWidth();
+                        for(int w = 0; w < this.context.chunkWidth(); w++) {
+                            int x = k + m * this.context.chunkWidth() + w;
+                            int y = x & 15;
+                            double e = (double) w / (double) this.context.chunkWidth();
+                            list.forEach(interpolator_ -> interpolator_.updateForX(e));
                             
-                            interpolators.forEach(interpolator_ -> interpolator_.updateForX(factorX));
-                            
-                            for(int pieceZ = 0; pieceZ < this.context.chunkWidth(); pieceZ++) {
-                                int realZ = minBlockZ + noiseZ * this.context.chunkWidth() + pieceZ;
-                                int localZ = realZ & 15;
-                                double factorZ = (double) pieceZ / (double) this.context.chunkWidth();
-                                double density = interpolator.calculateValue(factorZ);
-                                
-                                BlockState state = this.updateNoiseAndGenerateBaseState(beardifier, aquifer, caveNoiseModifier.apply(factorZ), realX, realY, realZ, density);
+                            for(int z = 0; z < this.context.chunkWidth(); z++) {
+                                int aa = l + o * this.context.chunkWidth() + z;
+                                int ab = aa & 15;
+                                double f = (double) z / (double) this.context.chunkWidth();
+                                double g = noiseInterpolator.calculateValue(f);
+                                BlockState state = this.updateNoiseAndGenerateBaseState(beardifier, aquifer, caveNoiseModifier.apply(f), x, t, aa, g);
                                 
                                 if (!state.isAir()) {
-                                    if (state.getLightEmission() != 0 && chunk instanceof ProtoChunk) {
-                                        mutable.set(realX, realY, realZ);
-                                        proto.addLight(mutable);
+                                    if (state.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
+                                        mutableBlockPos.set(x, t, aa);
+                                        protoChunk.addLight(mutableBlockPos);
                                     }
                                     
-                                    section.setBlockState(localX, localY, localZ, state, false);
-                                    oceanFloor.update(localX, realY, localZ, state);
-                                    worldSurface.update(localX, realY, localZ, state);
+                                    section.setBlockState(y, u, ab, state, false);
+                                    heightmap.update(y, t, ab, state);
+                                    heightmap2.update(y, t, ab, state);
                                     
                                     if (aquifer.shouldScheduleFluidUpdate() && !state.getFluidState().isEmpty()) {
-                                        mutable.set(realX, realY, realZ);
-                                        chunk.getLiquidTicks().scheduleTick(mutable, state.getFluidState().getType(), 0);
+                                        mutableBlockPos.set(x, t, aa);
+                                        chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, state.getFluidState().getType(), 0);
                                     }
                                 }
                             }
@@ -273,9 +282,18 @@ public class OfflimitsChunkGenerator {
                 }
             }
             
-            interpolators.forEach(NoiseInterpolator::swapSlices);
+            list.forEach(NoiseInterpolator::swapSlices);
+        }
+    }
+    
+    private DoubleFunction<NoiseModifier> createCaveNoiseModifier(int minY, ChunkPos pos, Consumer<NoiseInterpolator> consumer) {
+        if (Offlimits.CONFIG.areNoodleCavesEnabled.get()) {
+            NoodleCaveNoiseModifier modifier = new NoodleCaveNoiseModifier(pos, this.context.chunkCountX(), this.context.chunkCountY(), this.context.chunkCountZ(), this.noodleCavifier, minY);
+            modifier.listInterpolators(consumer);
+            return modifier::prepare;
         }
         
+        return value -> NoiseModifier.PASSTHROUGH;
     }
     
     protected BlockState updateNoiseAndGenerateBaseState(Beardifier beardifier, Aquifer aquifer, NoiseModifier modifier, int x, int y, int z, double density) {
@@ -284,16 +302,6 @@ public class OfflimitsChunkGenerator {
         updatedDensity = modifier.modifyNoise(updatedDensity, x, y, z);
         updatedDensity += beardifier.beardifyOrBury(x, y, z);
         return aquifer.computeState(new SimpleStoneSource(this.context.defaultBlock()), x, y, z, updatedDensity);
-    }
-    
-    private DoubleFunction<NoiseModifier> createCaveNoiseModifier(ChunkPos pos, Consumer<NoiseInterpolator> consumer) {
-        if (Offlimits.CONFIG.areNoodleCavesEnabled.get()) {
-            NoodleCaveNoiseModifier modifier = new NoodleCaveNoiseModifier(pos, this.context.chunkCountX(), this.context.chunkCountY(), this.context.chunkCountZ(), this.noodleCavifier);
-            modifier.listInterpolators(consumer);
-            return modifier::prepare;
-        }
-        
-        return value -> NoiseModifier.PASSTHROUGH;
     }
     
     private Aquifer getAquifer(int minChunkY, int chunkCountY, ChunkPos pos) {
