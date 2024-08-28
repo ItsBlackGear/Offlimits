@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -17,9 +18,13 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +59,8 @@ public abstract class ProtoChunkMixin {
     @Shadow public abstract ChunkStatus getStatus();
     
     @Shadow @Final private Map<Heightmap.Types, Heightmap> heightmaps;
+    
+    @Shadow @Final private Map<GenerationStep.Carving, BitSet> carvingMasks;
     
     @ModifyConstant(
         method = "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/UpgradeData;[Lnet/minecraft/world/level/chunk/LevelChunkSection;Lnet/minecraft/world/level/chunk/ProtoTickList;Lnet/minecraft/world/level/chunk/ProtoTickList;)V",
@@ -204,5 +211,14 @@ public abstract class ProtoChunkMixin {
         } else {
             return Blocks.VOID_AIR.defaultBlockState();
         }
+    }
+    
+    @Inject(
+        method = "getOrCreateCarvingMask",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private void off$getOrCreateCarvingMask(GenerationStep.Carving carving, CallbackInfoReturnable<BitSet> cir) {
+        cir.setReturnValue(this.carvingMasks.computeIfAbsent(carving, (carving_) -> new BitSet(98304)));
     }
 }

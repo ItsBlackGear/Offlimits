@@ -145,54 +145,101 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
         cancellable = true
     )
     private void offlimits$carveBlock(
-        ChunkAccess chunk,
-        Function<BlockPos, Biome> biomeGetter,
-        BitSet carvingMask,
+        ChunkAccess chunkAccess,
+        Function<BlockPos, Biome> function,
+        BitSet bitSet,
         Random random,
-        BlockPos.MutableBlockPos pos,
-        BlockPos.MutableBlockPos checkPos,
-        BlockPos.MutableBlockPos unused,
-        int startX,
-        int endX,
-        int startY,
-        int endY,
-        int startZ,
-        int endZ,
-        int minBlockX,
-        int minBlockZ,
-        MutableBoolean reachedSurface,
-        CallbackInfoReturnable<Boolean> callback
+        BlockPos.MutableBlockPos mutableBlockPos,
+        BlockPos.MutableBlockPos mutableBlockPos2,
+        BlockPos.MutableBlockPos mutableBlockPos3,
+        int i,
+        int j,
+        int k,
+        int l,
+        int m,
+        int n,
+        int o,
+        int p,
+        MutableBoolean mutableBoolean,
+//        ChunkAccess chunk,
+//        Function<BlockPos, Biome> biomeGetter,
+//        BitSet carvingMask,
+//        Random random,
+//        BlockPos.MutableBlockPos pos,
+//        BlockPos.MutableBlockPos checkPos,
+//        BlockPos.MutableBlockPos unused,
+//        int startX,
+//        int endX,
+//        int startY,
+//        int endY,
+//        int startZ,
+//        int endZ,
+//        int minBlockX,
+//        int minBlockZ,
+//        MutableBoolean reachedSurface,
+        CallbackInfoReturnable<Boolean> cir
     ) {
         if (Offlimits.CONFIG.allowTerrainModifications.get()) {
-            BlockState state = chunk.getBlockState(pos);
-            BlockState blockState2 = chunk.getBlockState(checkPos.setWithOffset(pos, Direction.UP));
+            BlockState state = chunkAccess.getBlockState(mutableBlockPos);
+            BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.UP));
             if (state.is(Blocks.GRASS_BLOCK) || blockState2.is(Blocks.MYCELIUM)) {
-                reachedSurface.setTrue();
+                mutableBoolean.setTrue();
             }
             
             if (!this.canReplaceBlock(state, blockState2)) {
-                callback.setReturnValue(false);
+                cir.setReturnValue(false);
             } else {
-                BlockState carveState = this.getCarveState(pos, this.aquifer);
+                BlockState carveState = this.getCarveState(mutableBlockPos, this.aquifer);
                 
                 if (carveState == null) {
-                    callback.setReturnValue(false);
+                    cir.setReturnValue(false);
                 } else {
-                    chunk.setBlockState(pos, carveState, false);
+                    chunkAccess.setBlockState(mutableBlockPos, carveState, false);
                     
                     if (this.aquifer.shouldScheduleFluidUpdate() && !carveState.getFluidState().isEmpty()) {
-                        chunk.getLiquidTicks().scheduleTick(pos, carveState.getFluidState().getType(), 0);
+                        chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, carveState.getFluidState().getType(), 0);
                     }
                     
-                    if (reachedSurface.isTrue()) {
-                        checkPos.setWithOffset(pos, Direction.DOWN);
+                    if (mutableBoolean.isTrue()) {
+                        mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.DOWN);
                         
-                        if (chunk.getBlockState(checkPos).is(Blocks.DIRT)) {
-                            chunk.setBlockState(checkPos, biomeGetter.apply(pos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), false);
+                        if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
+                            chunkAccess.setBlockState(mutableBlockPos2, function.apply(mutableBlockPos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), false);
                         }
                     }
                     
-                    callback.setReturnValue(true);
+                    cir.setReturnValue(true);
+                }
+            }
+        } else {
+            int q = n | p << 4 | o << 8;
+            if (bitSet.get(q)) {
+                cir.setReturnValue(false);
+            } else {
+                bitSet.set(q);
+                mutableBlockPos.set(l, o, m);
+                BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
+                BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.UP));
+                if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.MYCELIUM)) {
+                    mutableBoolean.setTrue();
+                }
+                
+                if (!this.canReplaceBlock(blockState, blockState2)) {
+                    cir.setReturnValue(false);
+                } else {
+                    if (o < Offlimits.CONFIG.worldGenMinY.get() + 11) {
+                        chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
+                    } else {
+                        chunkAccess.setBlockState(mutableBlockPos, Blocks.CAVE_AIR.defaultBlockState(), false);
+                        if (mutableBoolean.isTrue()) {
+                            mutableBlockPos3.setWithOffset(mutableBlockPos, Direction.DOWN);
+                            if (chunkAccess.getBlockState(mutableBlockPos3).is(Blocks.DIRT)) {
+                                chunkAccess.setBlockState(mutableBlockPos3, function.apply(mutableBlockPos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), false);
+                            }
+                        }
+                    }
+                    
+                    cir.setReturnValue(true);
                 }
             }
         }
@@ -200,7 +247,7 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
     
     @Unique
     private BlockState getCarveState(BlockPos pos, Aquifer aquifer) {
-        if (pos.getY() <= 9) {
+        if (pos.getY() <= Offlimits.CONFIG.worldGenMinY.get() + 9) {
             return LAVA.createLegacyBlock();
         } else if (!Offlimits.CONFIG.areAquifersEnabled.get()) {
             return AIR;

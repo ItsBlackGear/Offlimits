@@ -61,7 +61,7 @@ public class ChunkGenContext {
     }
     
     public int minY() {
-        return Offlimits.INSTANCE.getMinBuildHeight();
+        return Offlimits.CONFIG.worldGenMinY.get();
     }
     
     public int seaLevel() {

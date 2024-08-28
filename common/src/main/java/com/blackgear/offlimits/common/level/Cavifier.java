@@ -2,7 +2,6 @@ package com.blackgear.offlimits.common.level;
 
 import com.blackgear.offlimits.common.level.noise.NoiseModifier;
 import com.blackgear.offlimits.common.utils.NoiseUtils;
-import com.blackgear.offlimits.common.utils.SimpleRandom;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -31,22 +30,22 @@ public class Cavifier implements NoiseModifier {
     
     public Cavifier(WorldgenRandom random, int minChunkY) {
         this.minChunkY = minChunkY;
-        this.pillarNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 1.0, 1.0);
-        this.pillarRarenessModulator = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
-        this.pillarThicknessModulator = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
-        this.spaghetti2dNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 1.0);
-        this.spaghetti2dElevationModulator = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
-        this.spaghetti2dRarityModulator = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -11, 1.0);
-        this.spaghetti2dThicknessModulator = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -11, 1.0);
-        this.spaghetti3dNoiseSource1 = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 1.0);
-        this.spaghetti3dNoiseSource2 = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 1.0);
-        this.spaghetti3dRarityModulator = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -11, 1.0);
-        this.spaghetti3dThicknessModulator = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
-        this.spaghettiRoughnessNoise = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -5, 1.0);
-        this.spaghettiRoughnessModulator = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
-        this.caveEntranceNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 0.4, 0.5, 1.0);
-        this.layerNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
-        this.cheeseNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 0.5, 1.0, 2.0, 1.0, 2.0, 1.0, 0.0, 2.0, 0.0);
+        this.pillarNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 1.0, 1.0);
+        this.pillarRarenessModulator = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
+        this.pillarThicknessModulator = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
+        this.spaghetti2dNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 1.0);
+        this.spaghetti2dElevationModulator = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
+        this.spaghetti2dRarityModulator = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -11, 1.0);
+        this.spaghetti2dThicknessModulator = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -11, 1.0);
+        this.spaghetti3dNoiseSource1 = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 1.0);
+        this.spaghetti3dNoiseSource2 = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 1.0);
+        this.spaghetti3dRarityModulator = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -11, 1.0);
+        this.spaghetti3dThicknessModulator = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
+        this.spaghettiRoughnessNoise = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -5, 1.0);
+        this.spaghettiRoughnessModulator = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
+        this.caveEntranceNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 0.4, 0.5, 1.0);
+        this.layerNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
+        this.cheeseNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 0.5, 1.0, 2.0, 1.0, 2.0, 1.0, 0.0, 2.0, 0.0);
     }
     
     @Override

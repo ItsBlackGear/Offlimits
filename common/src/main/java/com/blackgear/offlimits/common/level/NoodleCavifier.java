@@ -2,7 +2,7 @@ package com.blackgear.offlimits.common.level;
 
 import com.blackgear.offlimits.common.utils.MathUtils;
 import com.blackgear.offlimits.common.utils.NoiseUtils;
-import com.blackgear.offlimits.common.utils.SimpleRandom;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import java.util.Random;
@@ -20,10 +20,10 @@ public class NoodleCavifier {
     
     public NoodleCavifier(long seed) {
         Random random = new Random(seed);
-        this.toggleNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
-        this.thicknessNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -8, 1.0);
-        this.noodleANoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 1.0);
-        this.noodleBNoiseSource = NoiseUtils.normal(new SimpleRandom(random.nextLong()), -7, 1.0);
+        this.toggleNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
+        this.thicknessNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
+        this.noodleANoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 1.0);
+        this.noodleBNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 1.0);
     }
     
     public void fillToggleNoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY) {

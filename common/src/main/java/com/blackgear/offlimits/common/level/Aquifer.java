@@ -107,7 +107,7 @@ public interface Aquifer {
             this.gridSizeZ = gridZ - this.minGridZ + 1;
             
             int gridSize = this.gridSizeX * gridSizeY * this.gridSizeZ;
-            this.aquiferCache = new Aquifer.NoiseBasedAquifer.AquiferStatus[gridSize];
+            this.aquiferCache = new AquiferStatus[gridSize];
             this.aquiferLocationCache = new long[gridSize];
             Arrays.fill(this.aquiferLocationCache, Long.MAX_VALUE);
         }

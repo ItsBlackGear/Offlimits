@@ -30,4 +30,8 @@ public class MathUtils {
     public static double map(double value, double prevStart, double prevEnd, double start, double end) {
         return Mth.lerp(Mth.inverseLerp(value, prevStart, prevEnd), start, end);
     }
+    
+    public static int quantize(double value, int factor) {
+        return Mth.floor(value / (double)factor) * factor;
+    }
 }

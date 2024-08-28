@@ -1,10 +1,7 @@
 package com.blackgear.offlimits.common.level.levelgen;
 
 import com.blackgear.offlimits.Offlimits;
-import com.blackgear.offlimits.common.level.Aquifer;
-import com.blackgear.offlimits.common.level.Beardifier;
-import com.blackgear.offlimits.common.level.Cavifier;
-import com.blackgear.offlimits.common.level.NoodleCavifier;
+import com.blackgear.offlimits.common.level.*;
 import com.blackgear.offlimits.common.level.levelgen.stonesource.SimpleStoneSource;
 import com.blackgear.offlimits.common.level.noise.BlendedNoise;
 import com.blackgear.offlimits.common.level.noise.NoiseInterpolator;
@@ -14,7 +11,6 @@ import com.blackgear.offlimits.common.level.noiseModifiers.NoodleCaveNoiseModifi
 import com.blackgear.offlimits.common.level.surface.BiomeExtension;
 import com.blackgear.offlimits.common.level.surface.WorldCarverExtension;
 import com.blackgear.offlimits.common.utils.NoiseUtils;
-import com.blackgear.offlimits.common.utils.SimpleRandom;
 import com.blackgear.offlimits.core.mixin.common.ConfiguredWorldCarverAccessor;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
@@ -27,6 +23,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -55,6 +52,7 @@ public class OfflimitsChunkGenerator {
     private final NoiseGeneratorSettings settings;
     
     private NormalNoise barrierNoise, waterLevelNoise, lavaNoise;
+    private NormalNoise fluidLevelFloodedNoise, fluidLevelSpreadNoise;
     
     private NoiseSampler sampler;
     private NoodleCavifier noodleCavifier;
@@ -67,9 +65,12 @@ public class OfflimitsChunkGenerator {
     
     public void initialize(BiomeSource biomeSource, long seed, SimplexNoise islandNoise, PerlinNoise depthNoise) {
         BlendedNoise blendedNoise = new BlendedNoise(this.random);
-        this.barrierNoise = NoiseUtils.normal(new SimpleRandom(this.random.nextLong()), -3, 1.0);
-        this.waterLevelNoise = NoiseUtils.normal(new SimpleRandom(this.random.nextLong()), -3, 1.0, 0.0, 2.0);
-        this.lavaNoise = NoiseUtils.normal(new SimpleRandom(this.random.nextLong()), -1, 1.0, 0.0);
+        this.barrierNoise = NoiseUtils.normal(new WorldgenRandom(this.random.nextLong()), -3, 1.0);
+        this.waterLevelNoise = NoiseUtils.normal(new WorldgenRandom(this.random.nextLong()), -3, 1.0, 0.0, 2.0);
+        this.fluidLevelFloodedNoise = NoiseUtils.normal(new WorldgenRandom(this.random.nextLong()), -7, 1.0);
+        this.lavaNoise = NoiseUtils.normal(new WorldgenRandom(this.random.nextLong()), -1, 1.0);
+        this.fluidLevelSpreadNoise = NoiseUtils.normal(new WorldgenRandom(this.random.nextLong()), -5, 1.0);
+//        this.lavaNoise = NoiseUtils.normal(new SimpleRandom(this.random.nextLong()), -1, 1.0, 0.0);
         
         NoiseModifier caveNoiseModifier;
         if (Offlimits.CONFIG.areNoiseCavesEnabled.get()) {
@@ -304,9 +305,33 @@ public class OfflimitsChunkGenerator {
         return aquifer.computeState(new SimpleStoneSource(this.context.defaultBlock()), x, y, z, updatedDensity);
     }
     
-    private Aquifer getAquifer(int minChunkY, int chunkCountY, ChunkPos pos) {
+    private Aquifer getAquifer(int minY, int height, ChunkPos pos) {
         if (Offlimits.CONFIG.areAquifersEnabled.get()) {
-            return Aquifer.create(pos, this.barrierNoise, this.waterLevelNoise, this.lavaNoise, this.settings, this.sampler, minChunkY * this.context.chunkHeight(), chunkCountY * this.context.chunkHeight());
+//            return Aquifer.create(
+//                pos,
+//                this.barrierNoise,
+//                this.waterLevelNoise,
+//                this.lavaNoise,
+//                this.settings,
+//                this.sampler,
+//                minY * this.context.chunkHeight(),
+//                height * this.context.chunkHeight()
+//            );
+            NoiseAquifer.FluidStatus fluidStatus = new NoiseAquifer.FluidStatus(this.context.minY() + 10, Blocks.LAVA.defaultBlockState());
+            NoiseAquifer.FluidStatus fluidStatus2 = new NoiseAquifer.FluidStatus(this.context.seaLevel(), this.context.defaultFluid());
+
+            return new NoiseAquifer(
+                this.sampler,
+                pos,
+                this.barrierNoise,
+                this.fluidLevelFloodedNoise,
+                this.fluidLevelSpreadNoise,
+                this.lavaNoise,
+                this.random,
+                minY * this.context.chunkHeight(),
+                height * this.context.chunkHeight(),
+                (x, y, z) -> y < Math.min(this.context.minY() + 10, this.context.seaLevel()) ? fluidStatus : fluidStatus2
+            );
         }
         
         return Aquifer.createDisabled(this.context.seaLevel(), this.context.defaultFluid());

@@ -38,7 +38,7 @@ public class NoiseSampler {
     private final double dimensionDensityFactor;
     private final double dimensionDensityOffset;
     private final NoiseModifier caveNoiseModifier;
-    private final int minY = Offlimits.INSTANCE.getMinBuildHeight();
+    private final int minY = Offlimits.CONFIG.worldGenMinY.get();
     
     public NoiseSampler(
         BiomeSource biomeSource,
