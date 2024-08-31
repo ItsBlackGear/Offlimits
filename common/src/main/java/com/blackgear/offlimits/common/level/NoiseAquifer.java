@@ -1,6 +1,5 @@
 package com.blackgear.offlimits.common.level;
 
-import com.blackgear.offlimits.Offlimits;
 import com.blackgear.offlimits.common.level.levelgen.stonesource.BaseStoneSource;
 import com.blackgear.offlimits.common.level.noise.NoiseSampler;
 import com.blackgear.offlimits.common.utils.MathUtils;

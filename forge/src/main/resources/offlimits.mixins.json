@@ -6,8 +6,6 @@
   "mixins": [
   ],
   "client": [
-    "embeddium.ChunkRenderColumnMixin",
-    "embeddium.ChunkRenderManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

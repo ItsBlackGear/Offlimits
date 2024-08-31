@@ -317,10 +317,10 @@ public class OfflimitsChunkGenerator {
 //                minY * this.context.chunkHeight(),
 //                height * this.context.chunkHeight()
 //            );
-            NoiseAquifer.FluidStatus fluidStatus = new NoiseAquifer.FluidStatus(this.context.minY() + 10, Blocks.LAVA.defaultBlockState());
-            NoiseAquifer.FluidStatus fluidStatus2 = new NoiseAquifer.FluidStatus(this.context.seaLevel(), this.context.defaultFluid());
+            Aquifer.FluidStatus fluidStatus = new Aquifer.FluidStatus(this.context.minY() + 10, Blocks.LAVA.defaultBlockState());
+            Aquifer.FluidStatus fluidStatus2 = new Aquifer.FluidStatus(this.context.seaLevel(), this.context.defaultFluid());
 
-            return new NoiseAquifer(
+            return new NoiseBasedAquifer(
                 this.sampler,
                 pos,
                 this.barrierNoise,

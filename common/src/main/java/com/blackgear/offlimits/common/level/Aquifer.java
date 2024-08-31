@@ -337,4 +337,22 @@ public interface Aquifer {
             this.fluidType = fluidType;
         }
     }
+    
+    interface  FluidPicker {
+        FluidStatus computeFluid(int x, int y, int z);
+    }
+    
+    class FluidStatus {
+        final int fluidLevel;
+        final BlockState fluidType;
+        
+        public FluidStatus(int fluidLevel, BlockState fluidType) {
+            this.fluidLevel = fluidLevel;
+            this.fluidType = fluidType;
+        }
+        
+        public BlockState at(int y) {
+            return y < this.fluidLevel ? this.fluidType : Blocks.AIR.defaultBlockState();
+        }
+    }
 }
