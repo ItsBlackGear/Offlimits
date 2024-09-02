@@ -4,6 +4,7 @@
   "package": "com.blackgear.offlimits.core.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "ProtoChunkAccessor",
     "common.ConfiguredWorldCarverAccessor",
     "common.DimensionTypeAccessor",
     "common.level.BiomeDefaultFeaturesMixin",

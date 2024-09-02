@@ -2,8 +2,10 @@ package com.blackgear.offlimits.core.mixin.common.level.carver;
 
 import com.blackgear.offlimits.Offlimits;
 import com.blackgear.offlimits.common.level.Aquifer;
+import com.blackgear.offlimits.common.level.levelgen.WorldGenerationContext;
 import com.blackgear.offlimits.common.level.levelgen.stonesource.SimpleStoneSource;
 import com.blackgear.offlimits.common.level.surface.WorldCarverExtension;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -17,12 +19,10 @@ import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.BitSet;
@@ -36,26 +36,24 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
     @Shadow @Final protected static BlockState AIR;
     
     @Shadow protected abstract boolean canReplaceBlock(BlockState state, BlockState aboveState);
-    @Shadow protected abstract boolean carveBlock(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, BlockPos.MutableBlockPos mutableBlockPos3, int i, int j, int k, int l, int m, int n, int o, int p, MutableBoolean mutableBoolean);
-    @Shadow protected abstract boolean skip(double d, double e, double f, int i);
-    @Shadow protected abstract boolean hasWater(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n, int o, int p);
-    
-    @Shadow @Final protected int genHeight;
-    
-    @Shadow protected Set<Fluid> liquids;
-    
+    @Shadow protected abstract boolean carveBlock(ChunkAccess chunk, Function<BlockPos, Biome> biomeGetter, BitSet carvingMask, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, BlockPos.MutableBlockPos mutableBlockPos3, int i, int j, int k, int l, int m, int n, int o, int p, MutableBoolean mutableBoolean);
+    @Shadow protected abstract boolean skip(double x, double y, double z, int localY);
     @Shadow protected abstract boolean isEdge(int minX, int maxX, int minZ, int maxZ, int x, int z);
     
+    @Mutable @Shadow @Final protected int genHeight;
+    @Shadow protected Set<Fluid> liquids;
+    
     @Unique private Aquifer aquifer;
+    @Unique private WorldGenerationContext context;
     
-    @Override
-    public Aquifer getAquifer() {
-        return this.aquifer;
-    }
+    @Override public Aquifer getAquifer() { return this.aquifer; }
+    @Override public void setAquifer(Aquifer aquifer) { this.aquifer = aquifer; }
+    @Override public WorldGenerationContext getContext() { return this.context; }
+    @Override public void setContext(WorldGenerationContext context) { this.context = context; }
     
-    @Override
-    public void setAquifer(Aquifer aquifer) {
-        this.aquifer = aquifer;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void off$init(Codec<?> codec, int i, CallbackInfo ci) {
+        this.genHeight = Offlimits.INSTANCE.getHeight();
     }
     
     @Inject(
@@ -78,7 +76,7 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
         BitSet carvingMask,
         CallbackInfoReturnable<Boolean> callback
     ) {
-        if (Offlimits.CONFIG.allowTerrainModifications.get()) {
+        if (this.getContext() != null && this.getContext().shouldGenerate()) {
             ChunkPos chunkPos = chunk.getPos();
             Random random = new Random(seed + (long) chunkX + (long) chunkZ);
             double centerX = (double) SectionPos.sectionToBlockCoord(chunkX) + 8;
@@ -90,11 +88,11 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
                 int minBlockZ = chunkPos.getMinBlockZ();
                 int startX = Math.max(Mth.floor(x - horizontalRadius) - minBlockX - 1, 0);
                 int endX = Math.min(Mth.floor(x + horizontalRadius) - minBlockX, 15);
-                int startY = Math.max(Mth.floor(y - verticalRadius) - 1, Offlimits.INSTANCE.getMinBuildHeight() + 1);
-                int endY = Math.min(Mth.floor(y + verticalRadius) + 1, Offlimits.INSTANCE.getMinBuildHeight() + this.genHeight - 8);
+                int startY = Math.max(Mth.floor(y - verticalRadius) - 1, this.getContext().getMinGenY() + 1);
+                int endY = Math.min(Mth.floor(y + verticalRadius) + 1, this.getContext().getMinGenY() + this.getContext().getGenDepth() - 8);
                 int startZ = Math.max(Mth.floor(z - horizontalRadius) - minBlockZ - 1, 0);
                 int endZ = Math.min(Mth.floor(z + horizontalRadius) - minBlockZ, 15);
-                
+
                 if (!Offlimits.CONFIG.areAquifersEnabled.get() && this.hasDisallowedLiquid(chunk, startX, endX, startY, endY, startZ, endZ)) {
                     callback.setReturnValue(false);
                 } else {
@@ -109,17 +107,17 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
                         for (int localZ = startZ; localZ <= endZ; localZ++) {
                             int blockZ = SectionPos.sectionToBlockCoord(chunkZ) + localZ;
                             double factorZ = ((double) blockZ + 0.5 - z) / horizontalRadius;
-                            
+
                             if (factorX * factorX + factorZ * factorZ < 1.0) {
                                 MutableBoolean mutableBoolean = new MutableBoolean(false);
 
                                 for (int localY = endY; localY > startY; localY--) {
                                     double factorY = ((double) localY - 0.5 - y) / verticalRadius;
-                                    
+
                                     if (!this.skip(factorX, factorY, factorZ, localY)) {
-                                        int realY = localY - Offlimits.INSTANCE.getMinBuildHeight();
+                                        int realY = localY - this.getContext().getMinGenY();
                                         int index = localX | localZ << 4 | realY << 8;
-                                        
+
                                         if (!carvingMask.get(index)) {
                                             carvingMask.set(index);
                                             pos.set(blockX, localY, blockZ);
@@ -163,35 +161,35 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
         MutableBoolean reachedSurface,
         CallbackInfoReturnable<Boolean> callback
     ) {
-        if (Offlimits.CONFIG.allowTerrainModifications.get()) {
+        if (this.getContext() != null && this.getContext().shouldGenerate()) {
             BlockState state = chunk.getBlockState(pos);
             BlockState blockState2 = chunk.getBlockState(checkPos.setWithOffset(pos, Direction.UP));
             if (state.is(Blocks.GRASS_BLOCK) || blockState2.is(Blocks.MYCELIUM)) {
                 reachedSurface.setTrue();
             }
-            
+
             if (!this.canReplaceBlock(state, blockState2)) {
                 callback.setReturnValue(false);
             } else {
-                BlockState carveState = this.getCarveState(pos, this.aquifer);
-                
+                BlockState carveState = this.getCarveState(pos, this.getAquifer());
+
                 if (carveState == null) {
                     callback.setReturnValue(false);
                 } else {
                     chunk.setBlockState(pos, carveState, false);
-                    
-                    if (this.aquifer.shouldScheduleFluidUpdate() && !carveState.getFluidState().isEmpty()) {
+
+                    if (this.getAquifer().shouldScheduleFluidUpdate() && !carveState.getFluidState().isEmpty()) {
                         chunk.getLiquidTicks().scheduleTick(pos, carveState.getFluidState().getType(), 0);
                     }
-                    
+
                     if (reachedSurface.isTrue()) {
                         checkPos.setWithOffset(pos, Direction.DOWN);
-                        
+
                         if (chunk.getBlockState(checkPos).is(Blocks.DIRT)) {
                             chunk.setBlockState(checkPos, biomeGetter.apply(pos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), false);
                         }
                     }
-                    
+
                     callback.setReturnValue(true);
                 }
             }
@@ -200,7 +198,7 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
     
     @Unique
     private BlockState getCarveState(BlockPos pos, Aquifer aquifer) {
-        if (pos.getY() <= 9) {
+        if (pos.getY() <= this.getContext().getMinGenY() + 9) {
             return LAVA.createLegacyBlock();
         } else if (!Offlimits.CONFIG.areAquifersEnabled.get()) {
             return AIR;

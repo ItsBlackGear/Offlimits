@@ -2,6 +2,7 @@ package com.blackgear.offlimits.core.mixin.common.level.chunk;
 
 import com.blackgear.offlimits.Offlimits;
 import com.blackgear.offlimits.common.level.levelgen.ChunkGenContext;
+import com.blackgear.offlimits.common.level.levelgen.WorldGenerationContext;
 import com.blackgear.offlimits.common.level.levelgen.OfflimitsChunkGenerator;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
@@ -31,7 +32,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -59,6 +59,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
     
     @Unique private ChunkGenContext context;
     @Unique private OfflimitsChunkGenerator generator;
+    @Unique private WorldGenerationContext noiseContext;
     
     public NoiseBasedChunkGeneratorMixin(BiomeSource biomeSource, StructureSettings settings) {
         super(biomeSource, settings);
@@ -75,6 +76,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         Supplier<NoiseGeneratorSettings> settings,
         CallbackInfo callback
     ) {
+        this.noiseContext = new WorldGenerationContext(settings.get());
         this.context = new ChunkGenContext(this.defaultBlock, this.defaultFluid, this.chunkCountX, this.chunkCountY, this.chunkCountZ, this.chunkWidth, this.chunkHeight, this.getSeaLevel());
         this.generator = new OfflimitsChunkGenerator(this.random, context, this.settings.get());
         this.generator.initialize(biomeSource, seed, this.islandNoise, this.depthNoise);
@@ -86,7 +88,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         cancellable = true
     )
     private void offlimits$fillNoiseColumn(double[] slices, int x, int z, CallbackInfo callback) {
-        if (!this.context.allowTerrainModifications()) {
+        if (!this.noiseContext.shouldGenerate()) {
             return;
         }
         
@@ -100,7 +102,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         cancellable = true
     )
     private void offlimits$buildSurfaceAndBedrock(WorldGenRegion level, ChunkAccess chunk, CallbackInfo callback) {
-        if (!this.context.allowTerrainModifications()) {
+        if (!this.noiseContext.shouldGenerate()) {
             return;
         }
         
@@ -112,11 +114,11 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
     
     @Override
     public void applyCarvers(long seed, BiomeManager biomeManager, ChunkAccess chunk, GenerationStep.Carving carving) {
-        if (!this.context.allowTerrainModifications()) {
+        if (!this.noiseContext.shouldGenerate()) {
             super.applyCarvers(seed, biomeManager, chunk, carving);
         }
-        
-        this.generator.applyCarvers(seed, biomeManager, this.biomeSource, chunk, carving);
+
+        this.generator.applyCarvers(seed, biomeManager, this.biomeSource, chunk, carving, this.noiseContext);
     }
     
     @Inject(
@@ -125,7 +127,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         cancellable = true
     )
     private void offlimits$iterateNoiseColumn(int x, int z, BlockState[] states, Predicate<BlockState> predicate, CallbackInfoReturnable<Integer> callback) {
-        if (!this.context.allowTerrainModifications()) {
+        if (!this.noiseContext.shouldGenerate()) {
             return;
         }
         
@@ -151,7 +153,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         cancellable = true
     )
     private void offlimits$fillFromNoise(LevelAccessor level, StructureFeatureManager featureManager, ChunkAccess chunk, CallbackInfo ci) {
-        if (!this.context.allowsTerrainModifications(level)) {
+        if (!this.noiseContext.shouldGenerate()) {
             return;
         }
 
@@ -170,44 +172,20 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         int maxSectionY = Offlimits.INSTANCE.getSectionIndex(chunkCountY * chunkHeight - 1 + minY);
         int minSectionY = Offlimits.INSTANCE.getSectionIndex(minY);
 
-        // Use a thread pool for parallel processing
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        List<Future<Void>> futures = new ArrayList<>();
-
         List<LevelChunkSection> sections = new ArrayList<>(maxSectionY - minSectionY + 1);
 
         try {
-            // Submit tasks for parallel execution
             for (int sectionY = maxSectionY; sectionY >= minSectionY; sectionY--) {
-                final int currentSectionY = sectionY;
-                futures.add(executor.submit(() -> {
-                    LevelChunkSection section = ((ProtoChunk) chunk).getOrCreateSection(currentSectionY);
+                LevelChunkSection section = ((ProtoChunk) chunk).getOrCreateSection(sectionY);
                     section.acquire();
-                    synchronized (sections) {
                         sections.add(section);
-                    }
-                    return null;
-                }));
             }
 
-            // Wait for all tasks to complete
-            for (Future<Void> future : futures) {
-                try {
-                    future.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-
-            // Call generator after acquiring all necessary sections
             this.generator.fillFromNoise(featureManager, chunk, minChunkY, chunkCountY);
         } finally {
-            // Ensure all sections are released
             for (LevelChunkSection section : sections) {
                 section.release();
             }
-            
-            executor.shutdown(); // Shut down the executor
         }
 
         ci.cancel();

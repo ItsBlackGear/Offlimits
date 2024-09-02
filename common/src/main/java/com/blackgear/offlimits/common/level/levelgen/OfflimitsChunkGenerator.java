@@ -14,6 +14,7 @@ import com.blackgear.offlimits.common.level.noiseModifiers.NoodleCaveNoiseModifi
 import com.blackgear.offlimits.common.level.surface.BiomeExtension;
 import com.blackgear.offlimits.common.level.surface.WorldCarverExtension;
 import com.blackgear.offlimits.common.utils.NoiseUtils;
+import com.blackgear.offlimits.core.mixin.ProtoChunkAccessor;
 import com.blackgear.offlimits.core.mixin.common.ConfiguredWorldCarverAccessor;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
@@ -117,16 +118,22 @@ public class OfflimitsChunkGenerator {
         }
     }
     
-    public void applyCarvers(long seed, BiomeManager biomeManager, BiomeSource biomeSource, ChunkAccess chunk, GenerationStep.Carving carving) {
+    public void applyCarvers(long seed, BiomeManager biomeManager, BiomeSource biomeSource, ChunkAccess chunk, GenerationStep.Carving type, WorldGenerationContext context) {
         BiomeManager diffBiomeManager = biomeManager.withDifferentSource(biomeSource);
         ChunkPos chunkPos = chunk.getPos();
         int chunkX = chunkPos.x;
         int chunkZ = chunkPos.z;
         BiomeGenerationSettings generationSettings = biomeSource.getNoiseBiome(chunkPos.x << 2, 0, chunkPos.z << 2).getGenerationSettings();
-        BitSet carvingMask = ((ProtoChunk) chunk).getOrCreateCarvingMask(carving);
+        BitSet carvingMask = ((ProtoChunkAccessor) chunk).getCarvingMasks().computeIfAbsent(type, carving -> {
+            if (context.shouldGenerate()) {
+                return new BitSet(98304);
+            }
+            
+            return new BitSet(65536);
+        });
         WorldgenRandom random = new WorldgenRandom();
         
-        List<Supplier<ConfiguredWorldCarver<?>>> carvers = generationSettings.getCarvers(carving);
+        List<Supplier<ConfiguredWorldCarver<?>>> carvers = generationSettings.getCarvers(type);
         int size = carvers.size();
         
         int minX = chunkX - 8;
@@ -141,6 +148,7 @@ public class OfflimitsChunkGenerator {
                     random.setLargeFeatureSeed(seed + (long) index, x, z);
                     
                     ((WorldCarverExtension) ((ConfiguredWorldCarverAccessor) carver).getWorldCarver()).setAquifer(this.createAquifer(chunk));
+                    ((WorldCarverExtension) ((ConfiguredWorldCarverAccessor) carver).getWorldCarver()).setContext(context);
                     
                     if (carver.isStartChunk(random, x, z)) {
                         carver.carve(chunk, diffBiomeManager::getBiome, random, this.context.seaLevel(), x, z, chunkX, chunkZ, carvingMask);
