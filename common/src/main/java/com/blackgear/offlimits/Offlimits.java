@@ -11,8 +11,8 @@ public class Offlimits {
 	public static final String MOD_ID = "offlimits";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	public static final OfflimitsConfig CONFIG = Environment.registerUnsafeConfig(MOD_ID, ModConfig.Type.COMMON, OfflimitsConfig::new);
-	public static final HeightLimitAccess INSTANCE = HeightLimitAccess.of(CONFIG.maxBuildHeight.get(), CONFIG.minBuildHeight.get());
-	public static final LightLimitAccess LIGHT = new LightLimitAccess(INSTANCE);
+	public static final HeightLimitAccess LEVEL = HeightLimitAccess.of(CONFIG.maxBuildHeight.get(), CONFIG.minBuildHeight.get());
+	public static final LightLimitAccess LIGHT = new LightLimitAccess(LEVEL);
 	
 	public static void bootstrap() {
 	}

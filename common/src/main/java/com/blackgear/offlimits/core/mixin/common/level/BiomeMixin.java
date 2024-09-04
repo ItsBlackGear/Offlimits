@@ -17,7 +17,7 @@ public class BiomeMixin implements BiomeExtension {
         constant = @Constant(intValue = 256)
     )
     private int offlimits$shouldSnow(int original) {
-        return Offlimits.INSTANCE.getMaxBuildHeight();
+        return Offlimits.LEVEL.getMaxBuildHeight();
     }
     
     @ModifyConstant(
@@ -25,7 +25,7 @@ public class BiomeMixin implements BiomeExtension {
         constant = @Constant(intValue = 256)
     )
     private int offlimits$shouldFreeze(int original) {
-        return Offlimits.INSTANCE.getMaxBuildHeight();
+        return Offlimits.LEVEL.getMaxBuildHeight();
     }
     
     @Override

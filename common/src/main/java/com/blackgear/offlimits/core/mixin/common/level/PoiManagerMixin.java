@@ -45,7 +45,7 @@ public class PoiManagerMixin extends SectionStorage<PoiSection> {
         constant = @Constant(intValue = 16)
     )
     private int off$getInChunkMax(int original) {
-        return Offlimits.INSTANCE.getMaxSection();
+        return Offlimits.LEVEL.getMaxSection();
     }
     
     @ModifyConstant(
@@ -53,7 +53,7 @@ public class PoiManagerMixin extends SectionStorage<PoiSection> {
         constant = @Constant(intValue = 0)
     )
     private int off$getInChunkMin(int original) {
-        return Offlimits.INSTANCE.getMinSection();
+        return Offlimits.LEVEL.getMinSection();
     }
     
     @Inject(

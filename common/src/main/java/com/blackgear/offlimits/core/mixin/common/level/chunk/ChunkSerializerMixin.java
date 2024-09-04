@@ -72,7 +72,7 @@ public abstract class ChunkSerializerMixin {
         ProtoTickList<Fluid> liquidsToBeTicked = new ProtoTickList<>(fluid -> fluid == null || fluid == Fluids.EMPTY, pos, levelTag.getList("LiquidsToBeTicked", 9));
         boolean isLightOn = levelTag.getBoolean("isLightOn");
         ListTag sections = levelTag.getList("Sections", 10);
-        int j = Offlimits.INSTANCE.getSectionsCount();
+        int j = Offlimits.LEVEL.getSectionsCount();
         LevelChunkSection[] section = new LevelChunkSection[j];
         boolean hasSkyLight = level.dimensionType().hasSkyLight();
         ChunkSource chunkSource = level.getChunkSource();
@@ -90,7 +90,7 @@ public abstract class ChunkSerializerMixin {
                 levelChunkSection.getStates().read(sectionTag.getList("Palette", 10), sectionTag.getLongArray("BlockStates"));
                 levelChunkSection.recalcBlockCounts();
                 if (!levelChunkSection.isEmpty()) {
-                    section[Offlimits.INSTANCE.getSectionIndexFromSectionY(y)] = levelChunkSection;
+                    section[Offlimits.LEVEL.getSectionIndexFromSectionY(y)] = levelChunkSection;
                 }
                 
                 poiManager.checkConsistencyWithBlocks(pos, levelChunkSection);
@@ -140,10 +140,10 @@ public abstract class ChunkSerializerMixin {
             if (!isLightOn && protoChunk.getStatus().isOrAfter(ChunkStatus.LIGHT)) {
                 for(BlockPos blockPos : BlockPos.betweenClosed(
                     pos.getMinBlockX(),
-                    Offlimits.INSTANCE.getMinBuildHeight(),
+                    Offlimits.LEVEL.getMinBuildHeight(),
                     pos.getMinBlockZ(),
                     pos.getMaxBlockX(),
-                    Offlimits.INSTANCE.getMaxBuildHeight() - 1,
+                    Offlimits.LEVEL.getMaxBuildHeight() - 1,
                     pos.getMaxBlockZ())
                 ) {
                     if (chunk.getBlockState(blockPos).getLightEmission() != 0) {

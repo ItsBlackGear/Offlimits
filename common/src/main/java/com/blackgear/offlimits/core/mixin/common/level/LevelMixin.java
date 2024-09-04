@@ -9,21 +9,13 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(Level.class)
 public class LevelMixin {
-//    @ModifyConstant(
-//        method = "isOutsideBuildHeight(I)Z",
-//        constant = @Constant(intValue = 256)
-//    )
-//    private static int off$isOutsideBuildHeightMax(int original) {
-//        return Offlimits.INSTANCE.getMaxBuildHeight();
-//    }
-//
-//    @ModifyConstant(
-//        method = "isOutsideBuildHeight(I)Z",
-//        constant = @Constant(intValue = 0)
-//    )
-//    private static int off$isOutsideBuildHeightMin(int original) {
-//        return Offlimits.INSTANCE.getMinBuildHeight();
-//    }
+    @ModifyConstant(
+        method = "getHeight",
+        constant = @Constant(intValue = 0)
+    )
+    private int off$getMinBuildHeightFromHeightmap(int constant) {
+        return Offlimits.LEVEL.getMinBuildHeight();
+    }
     
     /**
      * @author
@@ -31,6 +23,6 @@ public class LevelMixin {
      */
     @Overwrite
     public static boolean isOutsideBuildHeight(int i) {
-        return i < Offlimits.INSTANCE.getMinBuildHeight() || i >= Offlimits.INSTANCE.getMaxBuildHeight();
+        return i < Offlimits.LEVEL.getMinBuildHeight() || i >= Offlimits.LEVEL.getMaxBuildHeight();
     }
 }

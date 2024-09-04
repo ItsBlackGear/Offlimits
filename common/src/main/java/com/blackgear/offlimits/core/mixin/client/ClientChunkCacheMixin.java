@@ -91,7 +91,7 @@ public abstract class ClientChunkCacheMixin extends ChunkSource {
             
             for(int m = 0; m < levelChunkSections.length; ++m) {
                 LevelChunkSection levelChunkSection = levelChunkSections[m];
-                int n = Offlimits.INSTANCE.getSectionYFromSectionIndex(m);
+                int n = Offlimits.LEVEL.getSectionYFromSectionIndex(m);
                 levelLightEngine.updateSectionStatus(SectionPos.of(i, n, j), LevelChunkSection.isEmpty(levelChunkSection));
             }
             

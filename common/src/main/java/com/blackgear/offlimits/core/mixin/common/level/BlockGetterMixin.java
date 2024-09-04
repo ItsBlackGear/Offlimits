@@ -13,6 +13,6 @@ public interface BlockGetterMixin {
      */
     @Overwrite
     default int getMaxBuildHeight() {
-        return Offlimits.INSTANCE.getMaxBuildHeight();
+        return Offlimits.LEVEL.getMaxBuildHeight();
     }
 }

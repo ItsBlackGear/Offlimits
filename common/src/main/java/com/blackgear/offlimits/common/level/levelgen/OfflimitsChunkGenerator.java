@@ -231,7 +231,7 @@ public class OfflimitsChunkGenerator {
             list.forEach(interpolator_ -> interpolator_.advanceCellX(n));
             
             for (int o = 0; o < this.context.chunkCountZ(); o++) {
-                LevelChunkSection section = protoChunk.getOrCreateSection(Offlimits.INSTANCE.getSectionsCount() - 1);
+                LevelChunkSection section = protoChunk.getOrCreateSection(Offlimits.LEVEL.getSectionsCount() - 1);
                 
                 for(int p = j - 1; p >= 0; --p) {
                     int q = o;
@@ -241,8 +241,8 @@ public class OfflimitsChunkGenerator {
                     for(int s = this.context.chunkHeight() - 1; s >= 0; s--) {
                         int t = (i + p) * this.context.chunkHeight() + s;
                         int u = t & 15;
-                        int v = Offlimits.INSTANCE.getSectionIndex(t);
-                        if (Offlimits.INSTANCE.getSectionIndex(section.bottomBlockY()) != v) {
+                        int v = Offlimits.LEVEL.getSectionIndex(t);
+                        if (Offlimits.LEVEL.getSectionIndex(section.bottomBlockY()) != v) {
                             section = protoChunk.getOrCreateSection(v);
                         }
                         

@@ -58,7 +58,7 @@ public abstract class ChunkHolderMixin {
         ChunkHolder.PlayerProvider playerProvider,
         CallbackInfo ci
     ) {
-        this.changedBlocksPerSection = new ShortSet[Offlimits.INSTANCE.getSectionsCount()];
+        this.changedBlocksPerSection = new ShortSet[Offlimits.LEVEL.getSectionsCount()];
     }
     
     @Inject(
@@ -69,7 +69,7 @@ public abstract class ChunkHolderMixin {
     public void blockChanged(BlockPos pos, CallbackInfo ci) {
         LevelChunk chunk = this.getTickingChunk();
         if (chunk != null) {
-            int i = Offlimits.INSTANCE.getSectionIndex(pos.getY());
+            int i = Offlimits.LEVEL.getSectionIndex(pos.getY());
             if (this.changedBlocksPerSection[i] == null) {
                 this.hasChangedSections = true;
                 this.changedBlocksPerSection[i] = new ShortOpenHashSet();
@@ -130,7 +130,7 @@ public abstract class ChunkHolderMixin {
             for(int j = 0; j < this.changedBlocksPerSection.length; ++j) {
                 ShortSet shortSet = this.changedBlocksPerSection[j];
                 if (shortSet != null) {
-                    int k = Offlimits.INSTANCE.getSectionYFromSectionIndex(j);
+                    int k = Offlimits.LEVEL.getSectionYFromSectionIndex(j);
                     SectionPos sectionPos = SectionPos.of(chunk.getPos(), k);
                     if (shortSet.size() == 1) {
                         BlockPos blockPos = sectionPos.relativeToBlockPos(shortSet.iterator().nextShort());

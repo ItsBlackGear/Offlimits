@@ -32,7 +32,7 @@ public abstract class ViewAreaMixin {
         constant = @Constant(intValue = 16)
     )
     private int off$setViewDistance(int original) {
-        return Offlimits.INSTANCE.getSectionsCount();
+        return Offlimits.LEVEL.getSectionsCount();
     }
     
     /**
@@ -55,7 +55,7 @@ public abstract class ViewAreaMixin {
                 int r = q + Math.floorMod(o * 16 - q, p);
                 
                 for(int s = 0; s < this.chunkGridSizeY; ++s) {
-                    int t = Offlimits.INSTANCE.getMinBuildHeight() + s * 16;
+                    int t = Offlimits.LEVEL.getMinBuildHeight() + s * 16;
                     ChunkRenderDispatcher.RenderChunk renderChunk = this.chunks[this.getChunkIndex(k, s, o)];
                     renderChunk.setOrigin(n, t, r);
                 }
@@ -70,7 +70,7 @@ public abstract class ViewAreaMixin {
     )
     private void off$setDirty(int sectionX, int sectionY, int sectionZ, boolean rerenderOnMainThread, CallbackInfo ci) {
         int x = Math.floorMod(sectionX, this.chunkGridSizeX);
-        int y = Math.floorMod(sectionY - Offlimits.INSTANCE.getMinSection(), this.chunkGridSizeY);
+        int y = Math.floorMod(sectionY - Offlimits.LEVEL.getMinSection(), this.chunkGridSizeY);
         int z = Math.floorMod(sectionZ, this.chunkGridSizeZ);
         ChunkRenderDispatcher.RenderChunk renderChunk = this.chunks[this.getChunkIndex(x, y, z)];
         renderChunk.setDirty(rerenderOnMainThread);
@@ -84,7 +84,7 @@ public abstract class ViewAreaMixin {
     @Overwrite
     public @Nullable ChunkRenderDispatcher.RenderChunk getRenderChunkAt(BlockPos blockPos) {
         int i = Mth.intFloorDiv(blockPos.getX(), 16);
-        int j = Mth.intFloorDiv(blockPos.getY() - Offlimits.INSTANCE.getMinBuildHeight(), 16);
+        int j = Mth.intFloorDiv(blockPos.getY() - Offlimits.LEVEL.getMinBuildHeight(), 16);
         int k = Mth.intFloorDiv(blockPos.getZ(), 16);
         if (j >= 0 && j < this.chunkGridSizeY) {
             i = Mth.positiveModulo(i, this.chunkGridSizeX);

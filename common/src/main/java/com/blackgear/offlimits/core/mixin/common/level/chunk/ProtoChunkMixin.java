@@ -67,7 +67,7 @@ public abstract class ProtoChunkMixin {
         constant = @Constant(intValue = 16)
     )
     private int offlimits$init(int original) {
-        return Offlimits.INSTANCE.getSectionsCount();
+        return Offlimits.LEVEL.getSectionsCount();
     }
     
     /**
@@ -78,7 +78,7 @@ public abstract class ProtoChunkMixin {
     public LevelChunkSection getOrCreateSection(int i) {
         LevelChunkSection[] sections = this.getSections();
         if (sections[i] == LevelChunk.EMPTY_SECTION) {
-            sections[i] = new LevelChunkSection(Offlimits.INSTANCE.getSectionYFromSectionIndex(i) << 4);
+            sections[i] = new LevelChunkSection(Offlimits.LEVEL.getSectionYFromSectionIndex(i) << 4);
         }
 
         return sections[i];
@@ -94,7 +94,7 @@ public abstract class ProtoChunkMixin {
         if (Level.isOutsideBuildHeight(i)) {
             return Blocks.VOID_AIR.defaultBlockState();
         } else {
-            LevelChunkSection levelChunkSection = this.getSections()[Offlimits.INSTANCE.getSectionIndex(i)];
+            LevelChunkSection levelChunkSection = this.getSections()[Offlimits.LEVEL.getSectionIndex(i)];
             return LevelChunkSection.isEmpty(levelChunkSection)
                 ? Blocks.AIR.defaultBlockState()
                 : levelChunkSection.getBlockState(blockPos.getX() & 15, i & 15, blockPos.getZ() & 15);
@@ -111,7 +111,7 @@ public abstract class ProtoChunkMixin {
         if (Level.isOutsideBuildHeight(i)) {
             return Fluids.EMPTY.defaultFluidState();
         } else {
-            LevelChunkSection levelChunkSection = this.getSections()[Offlimits.INSTANCE.getSectionIndex(i)];
+            LevelChunkSection levelChunkSection = this.getSections()[Offlimits.LEVEL.getSectionIndex(i)];
             return LevelChunkSection.isEmpty(levelChunkSection)
                 ? Fluids.EMPTY.defaultFluidState()
                 : levelChunkSection.getFluidState(blockPos.getX() & 15, i & 15, blockPos.getZ() & 15);
@@ -124,10 +124,10 @@ public abstract class ProtoChunkMixin {
      */
     @Overwrite
     public ShortList[] getPackedLights() {
-        ShortList[] shortLists = new ShortList[Offlimits.INSTANCE.getSectionsCount()];
+        ShortList[] shortLists = new ShortList[Offlimits.LEVEL.getSectionsCount()];
         
         for(BlockPos blockPos : this.lights) {
-            ChunkAccess.getOrCreateOffsetList(shortLists, Offlimits.INSTANCE.getSectionIndex(blockPos.getY())).add(packOffsetCoordinates(blockPos));
+            ChunkAccess.getOrCreateOffsetList(shortLists, Offlimits.LEVEL.getSectionIndex(blockPos.getY())).add(packOffsetCoordinates(blockPos));
         }
         
         return shortLists;
@@ -139,7 +139,7 @@ public abstract class ProtoChunkMixin {
      */
     @Overwrite
     public void addLight(short s, int i) {
-        this.addLight(unpackOffsetCoordinates(s, Offlimits.INSTANCE.getSectionYFromSectionIndex(i), this.chunkPos));
+        this.addLight(unpackOffsetCoordinates(s, Offlimits.LEVEL.getSectionYFromSectionIndex(i), this.chunkPos));
     }
     
     /**
@@ -149,7 +149,7 @@ public abstract class ProtoChunkMixin {
     @Overwrite
     public void markPosForPostprocessing(BlockPos blockPos) {
         if (!Level.isOutsideBuildHeight(blockPos)) {
-            ChunkAccess.getOrCreateOffsetList(this.postProcessing, Offlimits.INSTANCE.getSectionIndex(blockPos.getY())).add(packOffsetCoordinates(blockPos));
+            ChunkAccess.getOrCreateOffsetList(this.postProcessing, Offlimits.LEVEL.getSectionIndex(blockPos.getY())).add(packOffsetCoordinates(blockPos));
         }
     }
     
@@ -162,8 +162,8 @@ public abstract class ProtoChunkMixin {
         int i = blockPos.getX();
         int j = blockPos.getY();
         int k = blockPos.getZ();
-        if (j >= Offlimits.INSTANCE.getMinBuildHeight() && j < Offlimits.INSTANCE.getMaxBuildHeight()) {
-            int l = Offlimits.INSTANCE.getSectionIndex(j);
+        if (j >= Offlimits.LEVEL.getMinBuildHeight() && j < Offlimits.LEVEL.getMaxBuildHeight()) {
+            int l = Offlimits.LEVEL.getSectionIndex(j);
             if (this.sections[l] == LevelChunk.EMPTY_SECTION && blockState.is(Blocks.AIR)) {
                 return blockState;
             } else {

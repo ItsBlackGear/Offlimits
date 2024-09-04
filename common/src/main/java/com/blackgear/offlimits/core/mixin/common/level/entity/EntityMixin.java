@@ -13,6 +13,6 @@ public class EntityMixin {
         constant = @Constant(doubleValue = -64.0)
     )
     private double off$baseTick(double constant) {
-        return Offlimits.INSTANCE.getMinBuildHeight() - 64.0;
+        return Offlimits.LEVEL.getMinBuildHeight() - 64.0;
     }
 }

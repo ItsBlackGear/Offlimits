@@ -56,7 +56,7 @@ public abstract class ThreadedLevelLightEngineMixin extends LevelLightEngine {
                 super.queueSectionData(LightLayer.SKY, SectionPos.of(pos, i), null, true);
             }
             
-            for (int i = Offlimits.INSTANCE.getMinSection(); i < Offlimits.INSTANCE.getMaxSection(); i++) {
+            for (int i = Offlimits.LEVEL.getMinSection(); i < Offlimits.LEVEL.getMaxSection(); i++) {
                 super.updateSectionStatus(SectionPos.of(pos, i), true);
             }
         }, () -> "updateChunkStatus " + pos + " " + true));
@@ -74,10 +74,10 @@ public abstract class ThreadedLevelLightEngineMixin extends LevelLightEngine {
         this.addTask(chunkPos.x, chunkPos.z, ThreadedLevelLightEngine.TaskType.PRE_UPDATE, Util.name(() -> {
             LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
             
-            for(int i = 0; i < Offlimits.INSTANCE.getSectionsCount(); ++i) {
+            for(int i = 0; i < Offlimits.LEVEL.getSectionsCount(); ++i) {
                 LevelChunkSection levelChunkSection = levelChunkSections[i];
                 if (!LevelChunkSection.isEmpty(levelChunkSection)) {
-                    int j = Offlimits.INSTANCE.getSectionYFromSectionIndex(i);
+                    int j = Offlimits.LEVEL.getSectionYFromSectionIndex(i);
                     super.updateSectionStatus(SectionPos.of(chunkPos, j), false);
                 }
             }

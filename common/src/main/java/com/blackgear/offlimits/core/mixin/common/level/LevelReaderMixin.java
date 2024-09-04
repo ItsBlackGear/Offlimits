@@ -17,7 +17,7 @@ public interface LevelReaderMixin {
      */
     @Overwrite @Deprecated
     default boolean hasChunksAt(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-        if (toY >= Offlimits.INSTANCE.getMinBuildHeight() && fromY < Offlimits.INSTANCE.getMaxBuildHeight()) {
+        if (toY >= Offlimits.LEVEL.getMinBuildHeight() && fromY < Offlimits.LEVEL.getMaxBuildHeight()) {
             int minX = SectionPos.blockToSectionCoord(fromX);
             int minZ = SectionPos.blockToSectionCoord(fromZ);
             int maxX = SectionPos.blockToSectionCoord(toX);

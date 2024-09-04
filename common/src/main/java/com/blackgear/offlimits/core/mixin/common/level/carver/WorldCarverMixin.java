@@ -90,8 +90,8 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
                 int minBlockZ = chunkPos.getMinBlockZ();
                 int startX = Math.max(Mth.floor(x - horizontalRadius) - minBlockX - 1, 0);
                 int endX = Math.min(Mth.floor(x + horizontalRadius) - minBlockX, 15);
-                int startY = Math.max(Mth.floor(y - verticalRadius) - 1, Offlimits.INSTANCE.getMinBuildHeight() + 1);
-                int endY = Math.min(Mth.floor(y + verticalRadius) + 1, Offlimits.INSTANCE.getMinBuildHeight() + this.genHeight - 8);
+                int startY = Math.max(Mth.floor(y - verticalRadius) - 1, Offlimits.LEVEL.getMinBuildHeight() + 1);
+                int endY = Math.min(Mth.floor(y + verticalRadius) + 1, Offlimits.LEVEL.getMinBuildHeight() + this.genHeight - 8);
                 int startZ = Math.max(Mth.floor(z - horizontalRadius) - minBlockZ - 1, 0);
                 int endZ = Math.min(Mth.floor(z + horizontalRadius) - minBlockZ, 15);
                 
@@ -117,7 +117,7 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
                                     double factorY = ((double) localY - 0.5 - y) / verticalRadius;
                                     
                                     if (!this.skip(factorX, factorY, factorZ, localY)) {
-                                        int realY = localY - Offlimits.INSTANCE.getMinBuildHeight();
+                                        int realY = localY - Offlimits.LEVEL.getMinBuildHeight();
                                         int index = localX | localZ << 4 | realY << 8;
                                         
                                         if (!carvingMask.get(index)) {

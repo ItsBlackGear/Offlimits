@@ -53,7 +53,7 @@ public abstract class ClientPacketListenerMixin implements ClientGamePacketListe
             this.level.reAddEntitiesToChunk(chunk);
         }
         
-        for(int k = Offlimits.INSTANCE.getMinSection(); k < Offlimits.INSTANCE.getMaxSection(); ++k) {
+        for(int k = Offlimits.LEVEL.getMinSection(); k < Offlimits.LEVEL.getMaxSection(); ++k) {
             this.level.setSectionDirtyWithNeighbors(i, k, j);
         }
         
@@ -79,7 +79,7 @@ public abstract class ClientPacketListenerMixin implements ClientGamePacketListe
         clientchunkprovider.drop(i, j);
         LevelLightEngine worldlightmanager = clientchunkprovider.getLightEngine();
         
-        for(int k = Offlimits.INSTANCE.getMinSection(); k < Offlimits.INSTANCE.getMaxSection(); ++k) {
+        for(int k = Offlimits.LEVEL.getMinSection(); k < Offlimits.LEVEL.getMaxSection(); ++k) {
             this.level.setSectionDirtyWithNeighbors(i, k, j);
             worldlightmanager.updateSectionStatus(SectionPos.of(i, k, j), true);
         }

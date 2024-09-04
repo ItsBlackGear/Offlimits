@@ -21,7 +21,7 @@ public interface ChunkAccessMixin {
     @Overwrite
     default int getHighestSectionPosition() {
         LevelChunkSection levelChunkSection = this.getHighestSection();
-        return levelChunkSection == null ? Offlimits.INSTANCE.getMinBuildHeight() : levelChunkSection.bottomBlockY();
+        return levelChunkSection == null ? Offlimits.LEVEL.getMinBuildHeight() : levelChunkSection.bottomBlockY();
     }
     
     /**
@@ -30,16 +30,16 @@ public interface ChunkAccessMixin {
      */
     @Overwrite
     default boolean isYSpaceEmpty(int minY, int maxY) {
-        if (minY < Offlimits.INSTANCE.getMinBuildHeight()) {
-            minY = Offlimits.INSTANCE.getMinBuildHeight();
+        if (minY < Offlimits.LEVEL.getMinBuildHeight()) {
+            minY = Offlimits.LEVEL.getMinBuildHeight();
         }
         
-        if (maxY >= Offlimits.INSTANCE.getMaxBuildHeight()) {
-            maxY = Offlimits.INSTANCE.getMaxBuildHeight() - 1;
+        if (maxY >= Offlimits.LEVEL.getMaxBuildHeight()) {
+            maxY = Offlimits.LEVEL.getMaxBuildHeight() - 1;
         }
         
         for (int y = minY; y <= maxY; y+= 16) {
-            if (!LevelChunkSection.isEmpty(this.getSections()[Offlimits.INSTANCE.getSectionIndex(y)])) {
+            if (!LevelChunkSection.isEmpty(this.getSections()[Offlimits.LEVEL.getSectionIndex(y)])) {
                 return false;
             }
         }

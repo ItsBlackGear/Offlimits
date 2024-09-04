@@ -15,7 +15,7 @@ public class NoiseInterpolator {
     private final int firstCellXInChunk, firstCellZInChunk;
     
     public NoiseInterpolator(int cellCountX, int cellCountY, int cellCountZ, ChunkPos chunkPos, NoiseColumnFiller noiseColumnFiller) {
-        this(cellCountX, cellCountY, cellCountZ, chunkPos, Offlimits.INSTANCE.getMinBuildHeight(), noiseColumnFiller);
+        this(cellCountX, cellCountY, cellCountZ, chunkPos, Offlimits.LEVEL.getMinBuildHeight(), noiseColumnFiller);
     }
     
     public NoiseInterpolator(int cellCountX, int cellCountY, int cellCountZ, ChunkPos chunkPos, int cellNoiseMinY, NoiseColumnFiller noiseColumnFiller) {

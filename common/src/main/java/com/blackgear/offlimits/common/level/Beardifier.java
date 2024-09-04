@@ -45,7 +45,7 @@ public class Beardifier {
         this.rigids = new ObjectArrayList<>(10);
         
         for(StructureFeature<?> structureFeature : StructureFeature.NOISE_AFFECTING_FEATURES) {
-            featureManager.startsForFeature(SectionPos.of(pos, Offlimits.INSTANCE.getMinSection()), structureFeature).forEach(structureStart -> {
+            featureManager.startsForFeature(SectionPos.of(pos, Offlimits.LEVEL.getMinSection()), structureFeature).forEach(structureStart -> {
                 for(StructurePiece structurePiece : structureStart.getPieces()) {
                     if (structurePiece.isCloseToChunk(pos, 12)) {
                         if (structurePiece instanceof PoolElementStructurePiece) {

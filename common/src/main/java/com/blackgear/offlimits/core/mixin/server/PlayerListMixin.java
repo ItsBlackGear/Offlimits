@@ -13,6 +13,6 @@ public class PlayerListMixin {
         constant = @Constant(doubleValue = 256.0D)
     )
     private double offlimits$respawn(double original) {
-        return Offlimits.INSTANCE.getMaxBuildHeight();
+        return Offlimits.LEVEL.getMaxBuildHeight();
     }
 }

@@ -37,7 +37,7 @@ public class NoodleCaveNoiseModifier implements NoiseModifier {
         double thickness = this.thickness.calculateValue(this.factorZ);
         double ridgeA = this.ridgeA.calculateValue(this.factorZ);
         double ridgeB = this.ridgeB.calculateValue(this.factorZ);
-        return this.cavifier.noodleCavify(density, x, y, z, toggle, thickness, ridgeA, ridgeB, Offlimits.INSTANCE.getMinBuildHeight());
+        return this.cavifier.noodleCavify(density, x, y, z, toggle, thickness, ridgeA, ridgeB, Offlimits.LEVEL.getMinBuildHeight());
     }
     
     public void listInterpolators(Consumer<NoiseInterpolator> consumer) {

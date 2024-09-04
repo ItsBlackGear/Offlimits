@@ -18,7 +18,7 @@ public class HeightmapMixin {
         )
     )
     public BitStorage offlimits$init(int bits, int size) {
-        int i = Mth.ceillog2(Offlimits.INSTANCE.getHeight() + 1);
+        int i = Mth.ceillog2(Offlimits.LEVEL.getHeight() + 1);
         return new BitStorage(i, 256);
     }
 }

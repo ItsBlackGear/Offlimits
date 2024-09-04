@@ -47,7 +47,7 @@ public abstract class SectionStorageMixin<R> {
     )
     private <T> void off$readColumn(ChunkPos chunkPos, DynamicOps<T> dynamicOps, @Nullable T object, CallbackInfo ci) {
         if (object == null) {
-            for (int i = Offlimits.INSTANCE.getMinSection(); i < Offlimits.INSTANCE.getMaxSection(); ++i) {
+            for (int i = Offlimits.LEVEL.getMinSection(); i < Offlimits.LEVEL.getMaxSection(); ++i) {
                 this.storage.put(SectionPos.of(chunkPos, i).asLong(), Optional.empty());
             }
         } else {
@@ -58,7 +58,7 @@ public abstract class SectionStorageMixin<R> {
             Dynamic<T> dynamic2 = this.fixerUpper.update(this.type.getType(), dynamic, j, k);
             OptionalDynamic<T> optionalDynamic = dynamic2.get("Sections");
 
-            for(int l = Offlimits.INSTANCE.getMinSection(); l < Offlimits.INSTANCE.getMaxSection(); ++l) {
+            for(int l = Offlimits.LEVEL.getMinSection(); l < Offlimits.LEVEL.getMaxSection(); ++l) {
                 long m = SectionPos.of(chunkPos, l).asLong();
                 Optional<R> optional = optionalDynamic.get(Integer.toString(l))
                     .result()
@@ -84,7 +84,7 @@ public abstract class SectionStorageMixin<R> {
     private <T> void off$writeColumn(ChunkPos chunkPos, DynamicOps<T> dynamicOps, CallbackInfoReturnable<Dynamic<T>> cir) {
         Map<T, T> map = Maps.newHashMap();
 
-        for(int i = Offlimits.INSTANCE.getMinSection(); i < Offlimits.INSTANCE.getMaxSection(); ++i) {
+        for(int i = Offlimits.LEVEL.getMinSection(); i < Offlimits.LEVEL.getMaxSection(); ++i) {
             long j = SectionPos.of(chunkPos, i).asLong();
             this.dirty.remove(j);
             Optional<R> optional = this.storage.get(j);
@@ -118,7 +118,7 @@ public abstract class SectionStorageMixin<R> {
     )
     private void off$flush(ChunkPos chunkPos, CallbackInfo ci) {
         if (!this.dirty.isEmpty()) {
-            for(int i = Offlimits.INSTANCE.getMinSection(); i < Offlimits.INSTANCE.getMaxSection(); ++i) {
+            for(int i = Offlimits.LEVEL.getMinSection(); i < Offlimits.LEVEL.getMaxSection(); ++i) {
                 long j = SectionPos.of(chunkPos, i).asLong();
                 if (this.dirty.contains(j)) {
                     this.writeColumn(chunkPos);

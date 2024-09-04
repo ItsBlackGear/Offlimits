@@ -13,6 +13,6 @@ public class IntegratedServerMixin {
         constant = @Constant(intValue = 256)
     )
     private int platform$init(int original) {
-        return Offlimits.INSTANCE.getMaxBuildHeight();
+        return Offlimits.LEVEL.getMaxBuildHeight();
     }
 }

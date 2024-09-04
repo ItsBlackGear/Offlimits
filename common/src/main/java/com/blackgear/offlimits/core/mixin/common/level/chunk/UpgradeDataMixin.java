@@ -51,7 +51,7 @@ public abstract class UpgradeDataMixin {
         constant = @Constant(intValue = 16)
     )
     private int off$constructor(int constant) {
-        return Offlimits.INSTANCE.getSectionsCount();
+        return Offlimits.LEVEL.getSectionsCount();
     }
     
     /**
@@ -76,7 +76,7 @@ public abstract class UpgradeDataMixin {
             Direction[] directions = Direction.values();
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-            for (BlockPos blockPos : BlockPos.betweenClosed(k, Offlimits.INSTANCE.getMinBuildHeight(), m, l, Offlimits.INSTANCE.getMaxBuildHeight() - 1, n)) {
+            for (BlockPos blockPos : BlockPos.betweenClosed(k, Offlimits.LEVEL.getMinBuildHeight(), m, l, Offlimits.LEVEL.getMaxBuildHeight() - 1, n)) {
                 BlockState blockState = level.getBlockState(blockPos);
                 BlockState blockState2 = blockState;
 
@@ -131,7 +131,7 @@ public abstract class UpgradeDataMixin {
         
         for(int i = 0; i < this.index.length; ++i) {
             if (this.index[i] != null) {
-                LOGGER.warn("Discarding update data for section {} for chunk ({} {})", Offlimits.INSTANCE.getSectionYFromSectionIndex(i), chunkPos.x, chunkPos.z);
+                LOGGER.warn("Discarding update data for section {} for chunk ({} {})", Offlimits.LEVEL.getSectionYFromSectionIndex(i), chunkPos.x, chunkPos.z);
             }
             
             this.index[i] = null;

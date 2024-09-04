@@ -3,7 +3,6 @@ package com.blackgear.offlimits.core.mixin.common.level.chunk;
 import com.blackgear.offlimits.Offlimits;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -47,7 +46,7 @@ public class ChunkGeneratorMixin {
         int j = region.getCenterZ();
         int k = i * 16;
         int l = j * 16;
-        BlockPos blockPos = new BlockPos(k, Offlimits.INSTANCE.getMinSection(), l);
+        BlockPos blockPos = new BlockPos(k, Offlimits.LEVEL.getMinSection(), l);
         Biome biome = this.biomeSource.getNoiseBiome((i << 2) + 2, 2, (j << 2) + 2);
         WorldgenRandom worldgenRandom = new WorldgenRandom();
         long m = worldgenRandom.setDecorationSeed(region.getSeed(), k, l);
@@ -80,7 +79,7 @@ public class ChunkGeneratorMixin {
         CallbackInfo ci
     ) {
         StructureStart<?> structureStart = featureManager.getStartForFeature(
-            SectionPos.of(chunk.getPos(), Offlimits.INSTANCE.getMinSection()),
+            SectionPos.of(chunk.getPos(), Offlimits.LEVEL.getMinSection()),
             config.feature,
             chunk
         );
@@ -111,7 +110,7 @@ public class ChunkGeneratorMixin {
         int k = chunk.getPos().z;
         int l = j << 4;
         int m = k << 4;
-        SectionPos sectionPos = SectionPos.of(chunk.getPos(), Offlimits.INSTANCE.getMinSection());
+        SectionPos sectionPos = SectionPos.of(chunk.getPos(), Offlimits.LEVEL.getMinSection());
         
         for(int n = j - 8; n <= j + 8; ++n) {
             for(int o = k - 8; o <= k + 8; ++o) {

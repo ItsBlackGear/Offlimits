@@ -13,6 +13,6 @@ public class ServerTickListMixin {
         constant = @Constant(intValue = 256)
     )
     private int offlimits$fetchTicksInChunk(int original){
-        return Offlimits.INSTANCE.getMaxBuildHeight();
+        return Offlimits.LEVEL.getMaxBuildHeight();
     }
 }

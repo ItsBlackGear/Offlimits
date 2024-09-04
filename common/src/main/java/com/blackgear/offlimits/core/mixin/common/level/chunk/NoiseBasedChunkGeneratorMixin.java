@@ -181,14 +181,14 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         }
         
         NoiseSettings settings = this.settings.get().noiseSettings();
-        int k = Math.max(this.context.minY(), Offlimits.INSTANCE.getMinBuildHeight());
-        int l = Math.min(k + settings.height(), Offlimits.INSTANCE.getMaxBuildHeight());
+        int k = Math.max(this.context.minY(), Offlimits.LEVEL.getMinBuildHeight());
+        int l = Math.min(k + settings.height(), Offlimits.LEVEL.getMaxBuildHeight());
         int m = Mth.intFloorDiv(k, this.chunkHeight);
         int n = Mth.intFloorDiv(l - k, this.chunkHeight);
         cir.setReturnValue(
             n <= 0
-                ? Offlimits.INSTANCE.getMinBuildHeight()
-                : this.generator.iterateNoiseColumn(i, j, null, types.isOpaque(), m, n).orElse(Offlimits.INSTANCE.getMinBuildHeight())
+                ? Offlimits.LEVEL.getMinBuildHeight()
+                : this.generator.iterateNoiseColumn(i, j, null, types.isOpaque(), m, n).orElse(Offlimits.LEVEL.getMinBuildHeight())
         );
     }
 
@@ -203,8 +203,8 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         }
         
         NoiseSettings settings = this.settings.get().noiseSettings();
-        int k = Math.max(this.context.minY(), Offlimits.INSTANCE.getMinBuildHeight());
-        int l = Math.min(k + settings.height(), Offlimits.INSTANCE.getMaxBuildHeight());
+        int k = Math.max(this.context.minY(), Offlimits.LEVEL.getMinBuildHeight());
+        int l = Math.min(k + settings.height(), Offlimits.LEVEL.getMaxBuildHeight());
         int m = Mth.intFloorDiv(k, this.chunkHeight);
         int n = Mth.intFloorDiv(l - k, this.chunkHeight);
         
@@ -235,8 +235,8 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         int l = k - noiseGeneratorSettings.getBedrockFloorPosition();
         int m = this.height - 1 + k - noiseGeneratorSettings.getBedrockRoofPosition();
         int n = 5;
-        int o = Offlimits.INSTANCE.getMinBuildHeight();
-        int p = Offlimits.INSTANCE.getMaxBuildHeight();
+        int o = Offlimits.LEVEL.getMinBuildHeight();
+        int p = Offlimits.LEVEL.getMaxBuildHeight();
         boolean bl = m + n - 1 >= o && m < p;
         boolean bl2 = l + n - 1 >= o && l < p;
         if (bl || bl2) {
@@ -269,7 +269,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
     )
     private void offlimits$fillFromNoise(LevelAccessor level, StructureFeatureManager featureManager, ChunkAccess chunk, CallbackInfo ci) {
         NoiseSettings settings = this.settings.get().noiseSettings();
-        int i = Math.max(this.context.minY(), Offlimits.INSTANCE.getMinBuildHeight());
+        int i = Math.max(this.context.minY(), Offlimits.LEVEL.getMinBuildHeight());
         int j = Math.min(this.context.minY() + settings.height(), chunk.getMaxBuildHeight());
         int k = Mth.intFloorDiv(i, this.chunkHeight);
         int l = Mth.intFloorDiv(j - i, this.chunkHeight);
@@ -288,8 +288,8 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
             ci.cancel();
         }
 
-        int m = Offlimits.INSTANCE.getSectionIndex(l * this.chunkHeight - 1 + i);
-        int n = Offlimits.INSTANCE.getSectionIndex(i);
+        int m = Offlimits.LEVEL.getSectionIndex(l * this.chunkHeight - 1 + i);
+        int n = Offlimits.LEVEL.getSectionIndex(i);
 
         // Use a thread pool for parallel processing
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -403,7 +403,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
             }
             
             for(o = 0; o < this.chunkCountZ; ++o) {
-                LevelChunkSection levelChunkSection = protoChunk.getOrCreateSection(Offlimits.INSTANCE.getSectionsCount() - 1);
+                LevelChunkSection levelChunkSection = protoChunk.getOrCreateSection(Offlimits.LEVEL.getSectionsCount() - 1);
                 levelChunkSection.acquire();
                 
                 for(int p = height - 1; p >= 0; --p) {
@@ -419,8 +419,8 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
                     for(int t = this.chunkHeight - 1; t >= 0; --t) {
                         int u = (minY + p) * this.chunkHeight + t;
                         int v = u & 15;
-                        int w = Offlimits.INSTANCE.getSectionIndex(u);
-                        if (Offlimits.INSTANCE.getSectionIndex(levelChunkSection.bottomBlockY()) != w) {
+                        int w = Offlimits.LEVEL.getSectionIndex(u);
+                        if (Offlimits.LEVEL.getSectionIndex(levelChunkSection.bottomBlockY()) != w) {
                             levelChunkSection.release();
                             levelChunkSection = protoChunk.getOrCreateSection(w);
                             levelChunkSection.acquire();

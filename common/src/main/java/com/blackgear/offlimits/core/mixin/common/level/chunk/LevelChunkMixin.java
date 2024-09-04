@@ -71,7 +71,7 @@ public abstract class LevelChunkMixin {
         expect = 3
     )
     private int offlimits$init(int original) {
-        return Offlimits.INSTANCE.getSectionsCount();
+        return Offlimits.LEVEL.getSectionsCount();
     }
     
     @Inject(
@@ -88,7 +88,7 @@ public abstract class LevelChunkMixin {
     ) {
         boolean bl = chunkBiomeContainer != null;
         Predicate<BlockPos> predicate = bl ? (blockPos) -> true : (blockPos) -> {
-            return (bit & 1 << Offlimits.INSTANCE.getSectionIndex(blockPos.getY())) != 0;
+            return (bit & 1 << Offlimits.LEVEL.getSectionIndex(blockPos.getY())) != 0;
         };
         Stream<BlockPos> blockEntities = Sets.newHashSet(this.blockEntities.keySet()).stream().filter(predicate);
         blockEntities.forEach(this.level::removeBlockEntity);
@@ -101,7 +101,7 @@ public abstract class LevelChunkMixin {
                 }
             } else {
                 if (section == EMPTY_SECTION) {
-                    section = new LevelChunkSection(Offlimits.INSTANCE.getSectionYFromSectionIndex(i) << 4);
+                    section = new LevelChunkSection(Offlimits.LEVEL.getSectionYFromSectionIndex(i) << 4);
                     this.sections[i] = section;
                 }
                 
@@ -139,7 +139,7 @@ public abstract class LevelChunkMixin {
             if (this.postProcessing[i] != null) {
                 
                 for (Short short_ : this.postProcessing[i]) {
-                    BlockPos blockPos = ProtoChunk.unpackOffsetCoordinates(short_, Offlimits.INSTANCE.getSectionYFromSectionIndex(i), chunkPos);
+                    BlockPos blockPos = ProtoChunk.unpackOffsetCoordinates(short_, Offlimits.LEVEL.getSectionYFromSectionIndex(i), chunkPos);
                     BlockState blockState = this.getBlockState(blockPos);
                     BlockState blockState2 = Block.updateFromNeighbourShapes(blockState, this.level, blockPos);
                     this.level.setBlock(blockPos, blockState2, 20);
@@ -182,7 +182,7 @@ public abstract class LevelChunkMixin {
             return blockState == null ? Blocks.AIR.defaultBlockState() : blockState;
         } else {
             try {
-                int l = Offlimits.INSTANCE.getSectionIndex(j);
+                int l = Offlimits.LEVEL.getSectionIndex(j);
                 if (l >= 0 && l < this.sections.length) {
                     LevelChunkSection levelChunkSection = this.sections[l];
                     if (!LevelChunkSection.isEmpty(levelChunkSection)) {
@@ -207,7 +207,7 @@ public abstract class LevelChunkMixin {
     @Overwrite
     public FluidState getFluidState(int i, int j, int k) {
         try {
-            int l = Offlimits.INSTANCE.getSectionIndex(j);
+            int l = Offlimits.LEVEL.getSectionIndex(j);
             if (l >= 0 && l < this.sections.length) {
                 LevelChunkSection levelChunkSection = this.sections[l];
                 if (!LevelChunkSection.isEmpty(levelChunkSection)) {
@@ -231,7 +231,7 @@ public abstract class LevelChunkMixin {
     @Overwrite
     public @Nullable BlockState setBlockState(BlockPos blockPos, BlockState blockState, boolean isMoving) {
         int i = blockPos.getY();
-        int j = Offlimits.INSTANCE.getSectionIndex(i);
+        int j = Offlimits.LEVEL.getSectionIndex(i);
         LevelChunkSection levelChunkSection = this.sections[j];
         if (levelChunkSection == EMPTY_SECTION) {
             if (blockState.isAir()) {

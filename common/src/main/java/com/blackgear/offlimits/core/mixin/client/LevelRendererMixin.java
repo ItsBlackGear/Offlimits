@@ -19,14 +19,12 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -119,7 +117,7 @@ public abstract class LevelRendererMixin {
         constant = @Constant(intValue = 69696)
     )
     private int off$constructor(int constant) {
-        return 4356 * Offlimits.INSTANCE.getSectionsCount();
+        return 4356 * Offlimits.LEVEL.getSectionsCount();
     }
     
     /**
@@ -187,7 +185,7 @@ public abstract class LevelRendererMixin {
                 renderChunk.setFrame(frameCount);
                 queue.add(this.instance.new RenderChunkInfo(renderChunk, null, 0));
             } else {
-                int j = blockPos.getY() > Offlimits.INSTANCE.getMinBuildHeight() ? Offlimits.INSTANCE.getMaxBuildHeight() - 8 : Offlimits.INSTANCE.getMinBuildHeight() + 8;
+                int j = blockPos.getY() > Offlimits.LEVEL.getMinBuildHeight() ? Offlimits.LEVEL.getMaxBuildHeight() - 8 : Offlimits.LEVEL.getMinBuildHeight() + 8;
                 int k = Mth.floor(vec3.x / 16.0) * 16;
                 int l = Mth.floor(vec3.z / 16.0) * 16;
                 List<LevelRenderer.RenderChunkInfo> list = Lists.newArrayList();
@@ -266,7 +264,7 @@ public abstract class LevelRendererMixin {
         BlockPos blockPos = renderChunkBase.getRelativeOrigin(facing);
         if (Mth.abs(playerPos.getX() - blockPos.getX()) > this.lastViewDistance * 16) {
             return null;
-        } else if (blockPos.getY() < Offlimits.INSTANCE.getMinBuildHeight() || blockPos.getY() >= Offlimits.INSTANCE.getMaxBuildHeight()) {
+        } else if (blockPos.getY() < Offlimits.LEVEL.getMinBuildHeight() || blockPos.getY() >= Offlimits.LEVEL.getMaxBuildHeight()) {
             return null;
         } else {
             return Mth.abs(playerPos.getZ() - blockPos.getZ()) > this.lastViewDistance * 16 ? null : ((ViewAreaAccessor) this.viewArea).callGetRenderChunkAt(blockPos);
@@ -321,10 +319,10 @@ public abstract class LevelRendererMixin {
                 for(t = q; t < r; s += 0.5F) {
                     u = Math.min(1.0, r - t);
                     v = (float)u * 0.5F;
-                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), Offlimits.INSTANCE.getMaxBuildHeight(), t, m + s, m + 0.0F);
-                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), Offlimits.INSTANCE.getMaxBuildHeight(), t + u, m + v + s, m + 0.0F);
-                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), Offlimits.INSTANCE.getMinBuildHeight(), t + u, m + v + s, m + 128.0F);
-                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), Offlimits.INSTANCE.getMinBuildHeight(), t, m + s, m + 128.0F);
+                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), Offlimits.LEVEL.getMaxBuildHeight(), t, m + s, m + 0.0F);
+                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), Offlimits.LEVEL.getMaxBuildHeight(), t + u, m + v + s, m + 0.0F);
+                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), Offlimits.LEVEL.getMinBuildHeight(), t + u, m + v + s, m + 128.0F);
+                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), Offlimits.LEVEL.getMinBuildHeight(), t, m + s, m + 128.0F);
                     ++t;
                 }
             }
@@ -335,10 +333,10 @@ public abstract class LevelRendererMixin {
                 for(t = q; t < r; s += 0.5F) {
                     u = Math.min(1.0, r - t);
                     v = (float)u * 0.5F;
-                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), Offlimits.INSTANCE.getMaxBuildHeight(), t, m + s, m + 0.0F);
-                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), Offlimits.INSTANCE.getMaxBuildHeight(), t + u, m + v + s, m + 0.0F);
-                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), Offlimits.INSTANCE.getMinBuildHeight(), t + u, m + v + s, m + 128.0F);
-                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), Offlimits.INSTANCE.getMinBuildHeight(), t, m + s, m + 128.0F);
+                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), Offlimits.LEVEL.getMaxBuildHeight(), t, m + s, m + 0.0F);
+                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), Offlimits.LEVEL.getMaxBuildHeight(), t + u, m + v + s, m + 0.0F);
+                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), Offlimits.LEVEL.getMinBuildHeight(), t + u, m + v + s, m + 128.0F);
+                    this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), Offlimits.LEVEL.getMinBuildHeight(), t, m + s, m + 128.0F);
                     ++t;
                 }
             }
@@ -351,10 +349,10 @@ public abstract class LevelRendererMixin {
                 for(t = q; t < r; s += 0.5F) {
                     u = Math.min(1.0, r - t);
                     v = (float)u * 0.5F;
-                    this.vertex(bufferBuilder, f, g, h, t, Offlimits.INSTANCE.getMaxBuildHeight(), worldBorder.getMaxZ(), m + s, m + 0.0F);
-                    this.vertex(bufferBuilder, f, g, h, t + u, Offlimits.INSTANCE.getMaxBuildHeight(), worldBorder.getMaxZ(), m + v + s, m + 0.0F);
-                    this.vertex(bufferBuilder, f, g, h, t + u, Offlimits.INSTANCE.getMinBuildHeight(), worldBorder.getMaxZ(), m + v + s, m + 128.0F);
-                    this.vertex(bufferBuilder, f, g, h, t, Offlimits.INSTANCE.getMinBuildHeight(), worldBorder.getMaxZ(), m + s, m + 128.0F);
+                    this.vertex(bufferBuilder, f, g, h, t, Offlimits.LEVEL.getMaxBuildHeight(), worldBorder.getMaxZ(), m + s, m + 0.0F);
+                    this.vertex(bufferBuilder, f, g, h, t + u, Offlimits.LEVEL.getMaxBuildHeight(), worldBorder.getMaxZ(), m + v + s, m + 0.0F);
+                    this.vertex(bufferBuilder, f, g, h, t + u, Offlimits.LEVEL.getMinBuildHeight(), worldBorder.getMaxZ(), m + v + s, m + 128.0F);
+                    this.vertex(bufferBuilder, f, g, h, t, Offlimits.LEVEL.getMinBuildHeight(), worldBorder.getMaxZ(), m + s, m + 128.0F);
                     ++t;
                 }
             }
@@ -365,10 +363,10 @@ public abstract class LevelRendererMixin {
                 for(t = q; t < r; s += 0.5F) {
                     u = Math.min(1.0, r - t);
                     v = (float)u * 0.5F;
-                    this.vertex(bufferBuilder, f, g, h, t, Offlimits.INSTANCE.getMaxBuildHeight(), worldBorder.getMinZ(), m + s, m + 0.0F);
-                    this.vertex(bufferBuilder, f, g, h, t + u, Offlimits.INSTANCE.getMaxBuildHeight(), worldBorder.getMinZ(), m + v + s, m + 0.0F);
-                    this.vertex(bufferBuilder, f, g, h, t + u, Offlimits.INSTANCE.getMinBuildHeight(), worldBorder.getMinZ(), m + v + s, m + 128.0F);
-                    this.vertex(bufferBuilder, f, g, h, t, Offlimits.INSTANCE.getMinBuildHeight(), worldBorder.getMinZ(), m + s, m + 128.0F);
+                    this.vertex(bufferBuilder, f, g, h, t, Offlimits.LEVEL.getMaxBuildHeight(), worldBorder.getMinZ(), m + s, m + 0.0F);
+                    this.vertex(bufferBuilder, f, g, h, t + u, Offlimits.LEVEL.getMaxBuildHeight(), worldBorder.getMinZ(), m + v + s, m + 0.0F);
+                    this.vertex(bufferBuilder, f, g, h, t + u, Offlimits.LEVEL.getMinBuildHeight(), worldBorder.getMinZ(), m + v + s, m + 128.0F);
+                    this.vertex(bufferBuilder, f, g, h, t, Offlimits.LEVEL.getMinBuildHeight(), worldBorder.getMinZ(), m + s, m + 128.0F);
                     ++t;
                 }
             }

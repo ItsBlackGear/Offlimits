@@ -29,7 +29,7 @@ public class ProtoTickListMixin<T> {
         constant = @Constant(intValue = 16)
     )
     private int init(int original) {
-        return Offlimits.INSTANCE.getSectionsCount();
+        return Offlimits.LEVEL.getSectionsCount();
     }
     
     /**
@@ -41,7 +41,7 @@ public class ProtoTickListMixin<T> {
         for(int i = 0; i < this.toBeTicked.length; ++i) {
             if (this.toBeTicked[i] != null) {
                 for(Short short_ : this.toBeTicked[i]) {
-                    BlockPos blockPos = ProtoChunk.unpackOffsetCoordinates(short_, Offlimits.INSTANCE.getSectionYFromSectionIndex(i), this.chunkPos);
+                    BlockPos blockPos = ProtoChunk.unpackOffsetCoordinates(short_, Offlimits.LEVEL.getSectionYFromSectionIndex(i), this.chunkPos);
                     tickList.scheduleTick(blockPos, function.apply(blockPos), 0);
                 }
                 
@@ -56,8 +56,8 @@ public class ProtoTickListMixin<T> {
      */
     @Overwrite
     public void scheduleTick(BlockPos blockPos, T object, int i, TickPriority tickPriority) {
-        int j = Offlimits.INSTANCE.getSectionIndex(blockPos.getY());
-        if (j >= 0 && j < Offlimits.INSTANCE.getSectionsCount()) {
+        int j = Offlimits.LEVEL.getSectionIndex(blockPos.getY());
+        if (j >= 0 && j < Offlimits.LEVEL.getSectionsCount()) {
             ChunkAccess.getOrCreateOffsetList(this.toBeTicked, j).add(ProtoChunk.packOffsetCoordinates(blockPos));
         }
     }

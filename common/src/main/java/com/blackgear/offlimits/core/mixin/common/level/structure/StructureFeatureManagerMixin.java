@@ -36,7 +36,7 @@ public abstract class StructureFeatureManagerMixin {
                 .getChunk(pos.x(), pos.z(), ChunkStatus.STRUCTURE_REFERENCES)
                 .getReferencesForFeature(structure)
                 .stream()
-                .map(long_ -> SectionPos.of(new ChunkPos(long_), Offlimits.INSTANCE.getMinSection()))
+                .map(long_ -> SectionPos.of(new ChunkPos(long_), Offlimits.LEVEL.getMinSection()))
                 .map(sectionPos -> this.getStartForFeature(sectionPos, structure, this.level.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_STARTS)))
                 .filter(structureStart -> structureStart != null && structureStart.isValid())
         );

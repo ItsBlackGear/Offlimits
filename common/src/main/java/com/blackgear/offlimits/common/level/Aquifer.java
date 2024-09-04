@@ -250,7 +250,7 @@ public interface Aquifer {
         }
         
         private boolean isLavaLevel(int y) {
-            return y - Offlimits.INSTANCE.getMinBuildHeight() <= 9;
+            return y - Offlimits.LEVEL.getMinBuildHeight() <= 9;
         }
         
         private double similarity(int firstDistance, int secondDistance) {
