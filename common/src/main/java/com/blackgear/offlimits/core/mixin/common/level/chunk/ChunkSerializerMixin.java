@@ -258,7 +258,7 @@ public abstract class ChunkSerializerMixin {
             
             if (levelChunkSection != LevelChunk.EMPTY_SECTION || dataLayer != null || dataLayer2 != null) {
                 CompoundTag compoundTag3 = new CompoundTag();
-                compoundTag3.putByte("Y", (byte)(index & 255));
+                compoundTag3.putByte("Y", (byte)(index & 0xFF));
                 if (levelChunkSection != LevelChunk.EMPTY_SECTION) {
                     levelChunkSection.getStates().write(compoundTag3, "Palette", "BlockStates");
                 }

@@ -7,7 +7,6 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.ChunkPos;
@@ -23,10 +22,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -67,6 +63,7 @@ public abstract class LevelChunkMixin {
     @Shadow @Final private Map<Heightmap.Types, Heightmap> heightmaps;
     
     @Shadow private volatile boolean unsaved;
+    @Unique private final LevelChunk self = (LevelChunk) (Object) this;
     
     @ModifyConstant(
         method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/ChunkBiomeContainer;Lnet/minecraft/world/level/chunk/UpgradeData;Lnet/minecraft/world/level/TickList;Lnet/minecraft/world/level/TickList;J[Lnet/minecraft/world/level/chunk/LevelChunkSection;Ljava/util/function/Consumer;)V",
@@ -159,7 +156,7 @@ public abstract class LevelChunkMixin {
         }
         
         this.pendingBlockEntities.clear();
-        this.upgradeData.upgrade((LevelChunk)(Object)this);
+        this.upgradeData.upgrade(this.self);
         ci.cancel();
     }
     
@@ -241,7 +238,7 @@ public abstract class LevelChunkMixin {
                 return null;
             }
             
-            levelChunkSection = new LevelChunkSection(i << 4);
+            levelChunkSection = new LevelChunkSection(i >> 4 << 4);
             this.sections[j] = levelChunkSection;
         }
         
@@ -273,20 +270,19 @@ public abstract class LevelChunkMixin {
             if (!levelChunkSection.getBlockState(k, l, m).is(block)) {
                 return null;
             } else {
-                BlockEntity blockEntity;
                 if (block2 instanceof EntityBlock) {
-                    blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.CHECK);
+                    BlockEntity blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.CHECK);
                     if (blockEntity != null) {
                         blockEntity.clearCache();
                     }
                 }
                 
                 if (!this.level.isClientSide) {
-                    blockState.onPlace(this.level, blockPos, blockState, isMoving);
+                    blockState.onPlace(this.level, blockPos, blockState2, isMoving);
                 }
                 
                 if (block instanceof EntityBlock) {
-                    blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.CHECK);
+                    BlockEntity blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.CHECK);
                     if (blockEntity == null) {
                         blockEntity = ((EntityBlock)block).newBlockEntity(this.level);
                         this.level.setBlockEntity(blockPos, blockEntity);
@@ -296,8 +292,10 @@ public abstract class LevelChunkMixin {
                 }
                 
                 this.unsaved = true;
-                return blockState;
+                return blockState2;
             }
         }
     }
+    
+    //TODO: getLights
 }

@@ -28,6 +28,7 @@
     "common.level.chunk.ProtoChunkMixin",
     "common.level.chunk.ProtoTickListMixin",
     "common.level.chunk.SectionStorageMixin",
+    "common.level.chunk.UpgradeDataAccessor",
     "common.level.chunk.UpgradeDataMixin",
     "common.level.entity.EntityMixin",
     "common.level.network.ClientboundLevelChunkPacketMixin",

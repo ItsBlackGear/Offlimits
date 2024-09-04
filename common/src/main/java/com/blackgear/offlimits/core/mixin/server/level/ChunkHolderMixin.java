@@ -1,7 +1,6 @@
 package com.blackgear.offlimits.core.mixin.server.level;
 
 import com.blackgear.offlimits.Offlimits;
-import it.unimi.dsi.fastutil.shorts.ShortArraySet;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import net.minecraft.core.BlockPos;
@@ -97,9 +96,9 @@ public abstract class ChunkHolderMixin {
             if (sectionY >= minSection && sectionY <= maxSection) {
                 int y = sectionY - minSection;
                 if (type == LightLayer.SKY) {
-                    this.skyChangedLightSectionFilter |= 1 << sectionY - y;
+                    this.skyChangedLightSectionFilter |= 1 << y;
                 } else {
-                    this.blockChangedLightSectionFilter |= 1 << sectionY - y;
+                    this.blockChangedLightSectionFilter |= 1 << y;
                 }
             }
         }
