@@ -46,7 +46,7 @@ public class SwampSurfaceBuilderMixin {
                 int localZ = z & 15;
                 BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
                 
-                for(int localY = startHeight; localY >= ((BiomeExtension) biome).getPreliminarySurfaceLevel(); --localY) {
+                for(int localY = startHeight; localY >= ((BiomeExtension) biome).getMinSurfaceLevel(); --localY) {
                     mutable.set(localX, localY, localZ);
                     
                     if (!chunk.getBlockState(mutable).isAir()) {

@@ -38,32 +38,34 @@ public class Beardifier {
     
     public Beardifier(StructureFeatureManager featureManager, ChunkAccess chunk) {
         ChunkPos pos = chunk.getPos();
-        int minChunkX = pos.getMinBlockX();
-        int minChunkZ = pos.getMinBlockZ();
+        int startX = pos.getMinBlockX();
+        int startZ = pos.getMinBlockZ();
         
         this.junctions = new ObjectArrayList<>(32);
         this.rigids = new ObjectArrayList<>(10);
         
-        for(StructureFeature<?> structureFeature : StructureFeature.NOISE_AFFECTING_FEATURES) {
-            featureManager.startsForFeature(SectionPos.of(pos, Offlimits.LEVEL.getMinSection()), structureFeature).forEach(structureStart -> {
-                for(StructurePiece structurePiece : structureStart.getPieces()) {
-                    if (structurePiece.isCloseToChunk(pos, 12)) {
-                        if (structurePiece instanceof PoolElementStructurePiece) {
-                            PoolElementStructurePiece poolElementStructurePiece = (PoolElementStructurePiece)structurePiece;
-                            StructureTemplatePool.Projection projection = poolElementStructurePiece.getElement().getProjection();
+        for (StructureFeature<?> structure : StructureFeature.NOISE_AFFECTING_FEATURES) {
+            featureManager.startsForFeature(SectionPos.of(pos, Offlimits.LEVEL.getMinSection()), structure).forEach(start -> {
+                for (StructurePiece piece : start.getPieces()) {
+                    if (piece.isCloseToChunk(pos, 12)) {
+                        if (piece instanceof PoolElementStructurePiece) {
+                            PoolElementStructurePiece poolElement = (PoolElementStructurePiece)piece;
+                            StructureTemplatePool.Projection projection = poolElement.getElement().getProjection();
+                            
                             if (projection == StructureTemplatePool.Projection.RIGID) {
-                                this.rigids.add(poolElementStructurePiece);
+                                this.rigids.add(poolElement);
                             }
                             
-                            for(JigsawJunction jigsawJunction : poolElementStructurePiece.getJunctions()) {
-                                int k = jigsawJunction.getSourceX();
-                                int l = jigsawJunction.getSourceZ();
-                                if (k > minChunkX - 12 && l > minChunkZ - 12 && k < minChunkX + 15 + 12 && l < minChunkZ + 15 + 12) {
-                                    this.junctions.add(jigsawJunction);
+                            for (JigsawJunction junction : poolElement.getJunctions()) {
+                                int sourceX = junction.getSourceX();
+                                int sourceZ = junction.getSourceZ();
+                                
+                                if (sourceX > startX - 12 && sourceZ > startZ - 12 && sourceX < startX + 15 + 12 && sourceZ < startZ + 15 + 12) {
+                                    this.junctions.add(junction);
                                 }
                             }
                         } else {
-                            this.rigids.add(structurePiece);
+                            this.rigids.add(piece);
                         }
                     }
                 }

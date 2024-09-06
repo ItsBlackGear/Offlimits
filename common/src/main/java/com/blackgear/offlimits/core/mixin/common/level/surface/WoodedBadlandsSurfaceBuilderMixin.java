@@ -69,7 +69,7 @@ public class WoodedBadlandsSurfaceBuilderMixin extends BadlandsSurfaceBuilder {
             int clayDepth = 0;
             BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
             
-            for(int y = startHeight; y >= ((BiomeExtension) biome).getPreliminarySurfaceLevel(); --y) {
+            for(int y = startHeight; y >= ((BiomeExtension) biome).getMinSurfaceLevel(); --y) {
                 if (clayDepth < 15) {
                     mutable.set(localX, y, localZ);
                     BlockState localState = chunk.getBlockState(mutable);

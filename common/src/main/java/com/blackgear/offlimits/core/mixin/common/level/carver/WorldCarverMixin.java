@@ -4,6 +4,7 @@ import com.blackgear.offlimits.Offlimits;
 import com.blackgear.offlimits.common.level.Aquifer;
 import com.blackgear.offlimits.common.level.levelgen.stonesource.SimpleStoneSource;
 import com.blackgear.offlimits.common.level.surface.WorldCarverExtension;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -17,12 +18,10 @@ import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.BitSet;
@@ -38,8 +37,8 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
     @Shadow protected abstract boolean canReplaceBlock(BlockState state, BlockState aboveState);
     @Shadow protected abstract boolean carveBlock(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, BlockPos.MutableBlockPos mutableBlockPos3, int i, int j, int k, int l, int m, int n, int o, int p, MutableBoolean mutableBoolean);
     @Shadow protected abstract boolean skip(double d, double e, double f, int i);
-    @Shadow protected abstract boolean hasWater(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n, int o, int p);
     
+    @Mutable
     @Shadow @Final protected int genHeight;
     
     @Shadow protected Set<Fluid> liquids;
@@ -56,6 +55,11 @@ public abstract class WorldCarverMixin implements WorldCarverExtension {
     @Override
     public void setAquifer(Aquifer aquifer) {
         this.aquifer = aquifer;
+    }
+    
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void offlimits$init(Codec codec, int i, CallbackInfo ci) {
+        this.genHeight = Offlimits.LEVEL.getMaxBuildHeight();
     }
     
     @Inject(

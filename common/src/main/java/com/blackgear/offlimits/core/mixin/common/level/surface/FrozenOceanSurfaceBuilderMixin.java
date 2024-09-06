@@ -94,7 +94,7 @@ public abstract class FrozenOceanSurfaceBuilderMixin {
             int iceLimit = 2 + random.nextInt(4);
             int iceHeight = seaLevel + 18 + random.nextInt(10);
             
-            for(int localY = Math.max(startHeight, (int)noise + 1); localY >= ((BiomeExtension) biome).getPreliminarySurfaceLevel(); --localY) {
+            for(int localY = Math.max(startHeight, (int)noise + 1); localY >= ((BiomeExtension) biome).getMinSurfaceLevel(); --localY) {
                 mutable.set(localX, localY, localZ);
                 if (chunk.getBlockState(mutable).isAir() && localY < (int)noise && random.nextDouble() > 0.01) {
                     chunk.setBlockState(mutable, PACKED_ICE, false);

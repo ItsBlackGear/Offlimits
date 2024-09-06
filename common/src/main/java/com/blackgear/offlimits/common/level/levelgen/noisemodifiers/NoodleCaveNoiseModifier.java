@@ -1,9 +1,7 @@
-package com.blackgear.offlimits.common.level.noiseModifiers;
+package com.blackgear.offlimits.common.level.levelgen.noisemodifiers;
 
-import com.blackgear.offlimits.Offlimits;
-import com.blackgear.offlimits.common.level.NoodleCavifier;
+import com.blackgear.offlimits.common.level.levelgen.TerrainContext;
 import com.blackgear.offlimits.common.level.noise.NoiseInterpolator;
-import com.blackgear.offlimits.common.level.noise.NoiseModifier;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.function.Consumer;
@@ -16,14 +14,16 @@ public class NoodleCaveNoiseModifier implements NoiseModifier {
     private double factorZ;
     
     private final NoodleCavifier cavifier;
+    private final TerrainContext context;
     
-    public NoodleCaveNoiseModifier(ChunkPos pos, int chunkCountX, int chunkCountY, int chunkCountZ, NoodleCavifier cavifier, int cellNoiseMinY) {
+    public NoodleCaveNoiseModifier(ChunkPos pos, TerrainContext context, NoodleCavifier cavifier, int cellNoiseMinY) {
         this.cavifier = cavifier;
+        this.context = context;
         
-        this.toggle = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cellNoiseMinY, cavifier::fillToggleNoiseColumn);
-        this.thickness = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cellNoiseMinY, cavifier::fillThicknessNoiseColumn);
-        this.ridgeA = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cellNoiseMinY, cavifier::fillRidgeANoiseColumn);
-        this.ridgeB = new NoiseInterpolator(chunkCountX, chunkCountY, chunkCountZ, pos, cellNoiseMinY, cavifier::fillRidgeBNoiseColumn);
+        this.toggle = new NoiseInterpolator(context.chunkCountX(), context.chunkCountY(), context.chunkCountZ(), pos, cellNoiseMinY, cavifier::fillToggleNoiseColumn);
+        this.thickness = new NoiseInterpolator(context.chunkCountX(), context.chunkCountY(), context.chunkCountZ(), pos, cellNoiseMinY, cavifier::fillThicknessNoiseColumn);
+        this.ridgeA = new NoiseInterpolator(context.chunkCountX(), context.chunkCountY(), context.chunkCountZ(), pos, cellNoiseMinY, cavifier::fillRidgeANoiseColumn);
+        this.ridgeB = new NoiseInterpolator(context.chunkCountX(), context.chunkCountY(), context.chunkCountZ(), pos, cellNoiseMinY, cavifier::fillRidgeBNoiseColumn);
     }
     
     public NoiseModifier prepare(double factorZ) {
@@ -37,7 +37,7 @@ public class NoodleCaveNoiseModifier implements NoiseModifier {
         double thickness = this.thickness.calculateValue(this.factorZ);
         double ridgeA = this.ridgeA.calculateValue(this.factorZ);
         double ridgeB = this.ridgeB.calculateValue(this.factorZ);
-        return this.cavifier.noodleCavify(density, x, y, z, toggle, thickness, ridgeA, ridgeB, Offlimits.LEVEL.getMinBuildHeight());
+        return this.cavifier.noodleCavify(density, x, y, z, toggle, thickness, ridgeA, ridgeB, this.context.minY());
     }
     
     public void listInterpolators(Consumer<NoiseInterpolator> consumer) {

@@ -46,7 +46,7 @@ public class DefaultSurfaceBuilderMixin {
             int remainingDepth = -1;
             
             // Loop through the height from the startHeight down to the preliminary surface level.
-            for(int level = startHeight; level >= ((BiomeExtension) biome).getPreliminarySurfaceLevel(); --level) {
+            for(int level = startHeight; level >= ((BiomeExtension) biome).getMinSurfaceLevel(); --level) {
                 mutable.set(x, level, z);
                 BlockState localState = chunk.getBlockState(mutable);
                 

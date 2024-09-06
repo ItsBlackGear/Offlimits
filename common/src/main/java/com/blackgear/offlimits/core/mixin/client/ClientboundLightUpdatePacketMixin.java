@@ -9,7 +9,11 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 @Mixin(ClientboundLightUpdatePacket.class)
 public class ClientboundLightUpdatePacketMixin {
     @ModifyConstant(
-        method = "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;Z)V",
+        method = {
+            "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;Z)V",
+            "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;IIZ)V",
+            "read"
+        },
         constant = @Constant(intValue = 18)
     )
     private int off$updateLightSectionsCount(int constant) {
@@ -17,10 +21,13 @@ public class ClientboundLightUpdatePacketMixin {
     }
     
     @ModifyConstant(
-        method = "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;Z)V",
+        method = {
+            "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;Z)V",
+            "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;IIZ)V"
+        },
         constant = @Constant(intValue = -1)
     )
-    private int off$updateMinLightSectionsCount(int constant) {
+    private int off$initMinLightSections(int constant) {
         return Offlimits.LIGHT.getMinLightSection();
     }
 }

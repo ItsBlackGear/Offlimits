@@ -1,18 +1,15 @@
-package com.blackgear.offlimits.common.level;
+package com.blackgear.offlimits.common.level.levelgen.noisemodifiers;
 
 import com.blackgear.offlimits.common.utils.MathUtils;
 import com.blackgear.offlimits.common.utils.NoiseUtils;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import java.util.Random;
 
 public class NoodleCavifier {
-    private static final int NOODLES_MAX_Y = 130;
     private static final double SPACING_AND_STRAIGHTNESS = 1.5;
     private static final double XZ_FREQUENCY = 2.6666666666666665;
     private static final double Y_FREQUENCY = 2.6666666666666665;
-    
     private final NormalNoise toggleNoiseSource;
     private final NormalNoise thicknessNoiseSource;
     private final NormalNoise noodleANoiseSource;
@@ -20,10 +17,10 @@ public class NoodleCavifier {
     
     public NoodleCavifier(long seed) {
         Random random = new Random(seed);
-        this.toggleNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
-        this.thicknessNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -8, 1.0);
-        this.noodleANoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 1.0);
-        this.noodleBNoiseSource = NoiseUtils.normal(new WorldgenRandom(random.nextLong()), -7, 1.0);
+        this.toggleNoiseSource = NoiseUtils.normal(random.nextLong(), -8, 1.0);
+        this.thicknessNoiseSource = NoiseUtils.normal(random.nextLong(), -8, 1.0);
+        this.noodleANoiseSource = NoiseUtils.normal(random.nextLong(), -7, 1.0);
+        this.noodleBNoiseSource = NoiseUtils.normal(random.nextLong(), -7, 1.0);
     }
     
     public void fillToggleNoiseColumn(double[] slices, int x, int z, int minY, int chunkCountY) {
@@ -53,22 +50,20 @@ public class NoodleCavifier {
             int localY = realY * 8;
             int localZ = z * 4;
             
-            double noise = localY < 138
-                ? NoiseUtils.sampleNoiseAndMapToRange(noiseSource, localX * xzFrequency, localY * yFrequency, localZ * xzFrequency, -1.0, 1.0)
-                : 1.0;
+            double noise = NoiseUtils.sampleNoiseAndMapToRange(noiseSource, localX * xzFrequency, localY * yFrequency, localZ * xzFrequency, -1.0, 1.0);
             
             slices[y] = noise;
         }
     }
     
-    public double noodleCavify(double density, int x, int y, int z, double toggle, double thickness, double ridgeA, double ridgeB, int minY) {
-        if (y > NOODLES_MAX_Y || y < minY + 4 || density < 0.0 || toggle < 0.0) {
+    public double noodleCavify(double density, int x, int y, int z, double toggleNoise, double thicknessNoise, double ridgeANoise, double ridgeBNoise, int minY) {
+        if (y < minY + 4 || density < 0.0 || toggleNoise < 0.0) {
             return density;
         }
         
-        double clampedThickness = MathUtils.clampedMap(thickness, -1.0, 1.0, 0.05, 0.1);
-        double spacingA = Math.abs(SPACING_AND_STRAIGHTNESS * ridgeA) - clampedThickness;
-        double spacingB = Math.abs(SPACING_AND_STRAIGHTNESS * ridgeB) - clampedThickness;
+        double thickness = MathUtils.clampedMap(thicknessNoise, -1.0, 1.0, 0.05, 0.1);
+        double spacingA = Math.abs(SPACING_AND_STRAIGHTNESS * ridgeANoise) - thickness;
+        double spacingB = Math.abs(SPACING_AND_STRAIGHTNESS * ridgeBNoise) - thickness;
         double maxRidge = Math.max(spacingA, spacingB);
         
         return Math.min(density, maxRidge);

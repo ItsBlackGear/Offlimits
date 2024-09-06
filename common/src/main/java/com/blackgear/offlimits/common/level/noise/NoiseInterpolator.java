@@ -1,70 +1,65 @@
 package com.blackgear.offlimits.common.level.noise;
 
-import com.blackgear.offlimits.Offlimits;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 
 public class NoiseInterpolator {
     private double[][] slice0, slice1;
-    private final int cellCountY, cellCountZ;
-    private final int cellNoiseMinY;
+    private final int chunkCountY, chunkCountZ;
+    private final int minY;
     private final NoiseColumnFiller noiseColumnFiller;
     private double noise000, noise001, noise100, noise101, noise010, noise011, noise110, noise111;
     private double valueXZ00, valueXZ10, valueXZ01, valueXZ11;
     private double valueZ0, valueZ1;
     private final int firstCellXInChunk, firstCellZInChunk;
     
-    public NoiseInterpolator(int cellCountX, int cellCountY, int cellCountZ, ChunkPos chunkPos, NoiseColumnFiller noiseColumnFiller) {
-        this(cellCountX, cellCountY, cellCountZ, chunkPos, Offlimits.LEVEL.getMinBuildHeight(), noiseColumnFiller);
-    }
-    
-    public NoiseInterpolator(int cellCountX, int cellCountY, int cellCountZ, ChunkPos chunkPos, int cellNoiseMinY, NoiseColumnFiller noiseColumnFiller) {
-        this.cellCountY = cellCountY;
-        this.cellCountZ = cellCountZ;
-        this.cellNoiseMinY = cellNoiseMinY;
+    public NoiseInterpolator(int chunkCountX, int chunkCountY, int chunkCountZ, ChunkPos chunkPos, int minY, NoiseColumnFiller noiseColumnFiller) {
+        this.chunkCountY = chunkCountY;
+        this.chunkCountZ = chunkCountZ;
+        this.minY = minY;
         this.noiseColumnFiller = noiseColumnFiller;
-        this.slice0 = allocateSlice(cellCountY, cellCountZ);
-        this.slice1 = allocateSlice(cellCountY, cellCountZ);
-        this.firstCellXInChunk = chunkPos.x * cellCountX;
-        this.firstCellZInChunk = chunkPos.z * cellCountZ;
+        this.slice0 = allocateSlice(chunkCountY, chunkCountZ);
+        this.slice1 = allocateSlice(chunkCountY, chunkCountZ);
+        this.firstCellXInChunk = chunkPos.x * chunkCountX;
+        this.firstCellZInChunk = chunkPos.z * chunkCountZ;
     }
     
-    private static double[][] allocateSlice(int cellCountY, int cellCountZ) {
-        int chunkCountZ = cellCountZ + 1;
-        int chunkCountY = cellCountY + 1;
-        double[][] slices = new double[chunkCountZ][chunkCountY];
+    private static double[][] allocateSlice(int chunkCountY, int chunkCountZ) {
+        int noiseZ = chunkCountZ + 1;
+        int noiseY = chunkCountY + 1;
+        double[][] buffer = new double[noiseZ][noiseY];
         
-        for(int noiseZ = 0; noiseZ < chunkCountZ; ++noiseZ) {
-            slices[noiseZ] = new double[chunkCountY];
+        for(int i = 0; i < noiseZ; ++i) {
+            buffer[i] = new double[noiseY];
         }
         
-        return slices;
+        return buffer;
     }
     
     public void initializeForFirstCellX() {
         this.fillSlice(this.slice0, this.firstCellXInChunk);
     }
     
-    public void advanceCellX(int cellX) {
-        this.fillSlice(this.slice1, this.firstCellXInChunk + cellX + 1);
+    public void advanceCellX(int chunkCountX) {
+        this.fillSlice(this.slice1, this.firstCellXInChunk + chunkCountX + 1);
     }
     
-    private void fillSlice(double[][] slice, int cellX) {
-        for(int noiseZ = 0; noiseZ < this.cellCountZ + 1; ++noiseZ) {
-            int cellZ = this.firstCellZInChunk + noiseZ;
-            this.noiseColumnFiller.fillNoiseColumn(slice[noiseZ], cellX, cellZ, this.cellNoiseMinY, this.cellCountY);
+    private void fillSlice(double[][] buffer, int x) {
+        for(int j = 0; j < this.chunkCountZ + 1; ++j) {
+            int z = this.firstCellZInChunk + j;
+            this.noiseColumnFiller.fillNoiseColumn(buffer[j], x, z, this.minY, this.chunkCountY);
         }
     }
     
-    public void selectCellYZ(int cellY, int cellZ) {
-        this.noise000 = this.slice0[cellZ][cellY];
-        this.noise001 = this.slice0[cellZ + 1][cellY];
-        this.noise100 = this.slice1[cellZ][cellY];
-        this.noise101 = this.slice1[cellZ + 1][cellY];
-        this.noise010 = this.slice0[cellZ][cellY + 1];
-        this.noise011 = this.slice0[cellZ + 1][cellY + 1];
-        this.noise110 = this.slice1[cellZ][cellY + 1];
-        this.noise111 = this.slice1[cellZ + 1][cellY + 1];
+    public void selectCellYZ(int chunkCountY, int chunkCountZ) {
+        this.noise000 = this.slice0[chunkCountZ][chunkCountY];
+        this.noise001 = this.slice0[chunkCountZ + 1][chunkCountY];
+        this.noise100 = this.slice1[chunkCountZ][chunkCountY];
+        this.noise101 = this.slice1[chunkCountZ + 1][chunkCountY];
+        this.noise010 = this.slice0[chunkCountZ][chunkCountY + 1];
+        this.noise011 = this.slice0[chunkCountZ + 1][chunkCountY + 1];
+        this.noise110 = this.slice1[chunkCountZ][chunkCountY + 1];
+        this.noise111 = this.slice1[chunkCountZ + 1][chunkCountY + 1];
     }
     
     public void updateForY(double factorY) {
@@ -91,6 +86,6 @@ public class NoiseInterpolator {
     
     @FunctionalInterface
     public interface NoiseColumnFiller {
-        void fillNoiseColumn(double[] slices, int x, int z, int cellNoiseMinY, int cellCountY);
+        void fillNoiseColumn(double[] buffer, int x, int z, int minY, int chunkCountY);
     }
 }

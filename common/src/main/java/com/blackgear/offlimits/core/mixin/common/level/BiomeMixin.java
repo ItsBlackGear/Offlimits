@@ -29,12 +29,12 @@ public class BiomeMixin implements BiomeExtension {
     }
     
     @Override
-    public int getPreliminarySurfaceLevel() {
+    public int getMinSurfaceLevel() {
         return this.preliminarySurfaceLevel;
     }
     
     @Override
-    public void setPreliminarySurfaceLevel(int level) {
+    public void setMinSurfaceLevel(int level) {
         this.preliminarySurfaceLevel = level;
     }
 }

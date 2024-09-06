@@ -1,18 +1,15 @@
 package com.blackgear.offlimits.common.level.levelgen;
 
 import com.blackgear.offlimits.Offlimits;
-import com.blackgear.offlimits.core.mixin.common.DimensionTypeAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class ChunkGenContext {
+public class TerrainContext {
     private final BlockState defaultBlock, defaultFluid;
     private final int chunkCountX, chunkCountY, chunkCountZ;
     private final int chunkWidth, chunkHeight;
     private final int seaLevel;
-    private boolean allowTerrainModifications = Offlimits.CONFIG.allowTerrainModifications.get();
     
-    public ChunkGenContext(
+    public TerrainContext(
         BlockState defaultBlock,
         BlockState defaultFluid,
         int chunkCountX,
@@ -60,20 +57,39 @@ public class ChunkGenContext {
         return this.chunkHeight;
     }
     
-    public int minY() {
-        return Offlimits.CONFIG.worldGenMinY.get();
-    }
-    
     public int seaLevel() {
         return this.seaLevel;
     }
     
-    public boolean allowTerrainModifications() {
-        return this.allowTerrainModifications;
+    public int height() {
+        return Offlimits.LEVEL.getHeight();
     }
     
-    public boolean allowsTerrainModifications(LevelReader level) {
-        this.allowTerrainModifications = level.dimensionType() == DimensionTypeAccessor.getDEFAULT_OVERWORLD() && Offlimits.CONFIG.allowTerrainModifications.get();
-        return this.allowTerrainModifications;
+    public int maxBuildHeight() {
+        return Offlimits.LEVEL.getMaxBuildHeight();
+    }
+    
+    public int minBuildHeight() {
+        return Offlimits.LEVEL.getMinBuildHeight();
+    }
+    
+    public int minY() {
+        return Offlimits.CONFIG.worldGenMinY.get();
+    }
+    
+    public boolean allowTerrainModifications() {
+        return Offlimits.CONFIG.allowTerrainModifications.get();
+    }
+    
+    public boolean areNoiseCavesEnabled() {
+        return Offlimits.CONFIG.areNoiseCavesEnabled.get();
+    }
+    
+    public boolean areNoodleCavesEnabled() {
+        return Offlimits.CONFIG.areNoodleCavesEnabled.get();
+    }
+    
+    public boolean areAquifersEnabled() {
+        return Offlimits.CONFIG.areAquifersEnabled.get();
     }
 }

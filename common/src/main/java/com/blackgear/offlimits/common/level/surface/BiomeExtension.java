@@ -1,7 +1,7 @@
 package com.blackgear.offlimits.common.level.surface;
 
 public interface BiomeExtension {
-    int getPreliminarySurfaceLevel();
+    int getMinSurfaceLevel();
     
-    void setPreliminarySurfaceLevel(int level);
+    void setMinSurfaceLevel(int level);
 }

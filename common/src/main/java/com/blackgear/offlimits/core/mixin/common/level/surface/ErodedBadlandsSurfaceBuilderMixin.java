@@ -81,7 +81,7 @@ public class ErodedBadlandsSurfaceBuilderMixin extends BadlandsSurfaceBuilder {
             boolean isTopMaterial = false;
             BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
-            for(int y = Math.max(startHeight, (int) noise + 1); y >= ((BiomeExtension) biome).getPreliminarySurfaceLevel(); --y) {
+            for(int y = Math.max(startHeight, (int) noise + 1); y >= ((BiomeExtension) biome).getMinSurfaceLevel(); --y) {
                 mutable.set(localX, y, localZ);
                 if (chunk.getBlockState(mutable).isAir() && y < (int) noise) {
                     chunk.setBlockState(mutable, defaultBlock, false);
