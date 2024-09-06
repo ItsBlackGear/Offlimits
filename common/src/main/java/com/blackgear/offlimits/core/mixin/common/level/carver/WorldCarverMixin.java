@@ -36,7 +36,6 @@ public abstract class WorldCarverMixin<C> implements WorldCarverExtension {
     
     @Inject(method = "<init>", at = @At("RETURN"))
     private void offlimits$init(Codec<C> codec, int i, CallbackInfo ci) {
-        this.genHeight = Offlimits.LEVEL.getMaxBuildHeight();
         this.carver = new NoiseCarver((WorldCarver<?>) (Object) this);
     }
     
@@ -60,6 +59,8 @@ public abstract class WorldCarverMixin<C> implements WorldCarverExtension {
         BitSet carvingMask,
         CallbackInfoReturnable<Boolean> cir
     ) {
+        this.genHeight = this.context.getGenDepth();
+
         cir.setReturnValue(
             this.carver.carveSphere(
                 chunk,

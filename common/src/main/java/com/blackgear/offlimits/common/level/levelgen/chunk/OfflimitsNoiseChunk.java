@@ -57,7 +57,7 @@ public class OfflimitsNoiseChunk extends NoiseChunk {
     public void initialize(BiomeSource source, long seed, @Nullable SimplexNoise islandNoise, PerlinNoise depthNoise) {
         BlendedNoise blendedNoise = new BlendedNoise(this.random);
         NoiseModifier caveNoiseModifier = this.context.areNoiseCavesEnabled()
-            ? new Cavifier(this.random, this.context.minY() / this.context.chunkHeight())
+            ? new Cavifier(this.random, this.minY() / this.context.chunkHeight())
             : NoiseModifier.PASSTHROUGH;
         
         this.barrierNoise = NoiseUtils.normal(this.random.nextLong(), -3, 1.0);
@@ -120,8 +120,8 @@ public class OfflimitsNoiseChunk extends NoiseChunk {
     
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types types) {
-        int genDepth = Math.max(this.context.minY(), this.context.minBuildHeight());
-        int genHeight = Math.min(this.context.minY() + this.context.height(), this.context.maxBuildHeight());
+        int genDepth = Math.max(this.minY(), this.context.minBuildHeight());
+        int genHeight = Math.min(this.minY() + this.height(), this.context.maxBuildHeight());
         int minY = Mth.intFloorDiv(genDepth, this.context.chunkHeight());
         int chunkCountY = Mth.intFloorDiv(genHeight - genDepth, this.context.chunkHeight());
         
@@ -132,8 +132,8 @@ public class OfflimitsNoiseChunk extends NoiseChunk {
     
     @Override
     public BlockGetter getBaseColumn(int x, int z) {
-        int genDepth = Math.max(this.context.minY(), this.context.minBuildHeight());
-        int genHeight = Math.min(this.context.minY() + this.context.height(), this.context.maxBuildHeight());
+        int genDepth = Math.max(this.minY(), this.context.minBuildHeight());
+        int genHeight = Math.min(this.minY() + this.height(), this.context.maxBuildHeight());
         int minY = Mth.intFloorDiv(genDepth, this.context.chunkHeight());
         int chunkCountY = Mth.intFloorDiv(genHeight - genDepth, this.context.chunkHeight());
         
@@ -288,7 +288,7 @@ public class OfflimitsNoiseChunk extends NoiseChunk {
     
     @Override
     public Aquifer createAquifer(ChunkAccess chunk) {
-        int minY = Mth.intFloorDiv(this.context.minY(), this.context.chunkHeight());
+        int minY = Mth.intFloorDiv(this.minY(), this.context.chunkHeight());
         return this.getAquifer(minY, this.context.chunkCountY(), chunk.getPos());
     }
     

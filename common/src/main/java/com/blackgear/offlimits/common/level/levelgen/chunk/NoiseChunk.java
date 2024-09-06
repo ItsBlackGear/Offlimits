@@ -7,6 +7,7 @@ import com.blackgear.offlimits.common.level.levelgen.sampler.NoiseSampler;
 import com.blackgear.offlimits.common.level.levelgen.sampler.OfflimitsNoiseSampler;
 import com.blackgear.offlimits.common.level.noise.BlendedNoise;
 import com.blackgear.offlimits.common.level.levelgen.noisemodifiers.NoiseModifier;
+import com.blackgear.offlimits.common.level.noise.NoiseSettingsExtension;
 import com.blackgear.offlimits.common.level.surface.BiomeExtension;
 import com.blackgear.offlimits.common.level.surface.WorldCarverExtension;
 import com.blackgear.offlimits.core.mixin.common.ConfiguredWorldCarverAccessor;
@@ -88,10 +89,10 @@ public abstract class NoiseChunk {
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         int startX = chunk.getPos().getMinBlockX();
         int startZ = chunk.getPos().getMinBlockX();
-        int startY = context.minY();
+        int startY = this.minY();
         
         int floorY = startY + settings.getBedrockFloorPosition();
-        int roofY = context.height() - 1 + startY - settings.getBedrockRoofPosition();
+        int roofY = this.height() - 1 + startY - settings.getBedrockRoofPosition();
         int minBuildHeight = context.minBuildHeight();
         int maxBuildHeight = context.maxBuildHeight();
         
@@ -179,5 +180,13 @@ public abstract class NoiseChunk {
     
     public Aquifer createAquifer(ChunkAccess chunk) {
         return Aquifer.createDisabled(this.context.seaLevel(), this.context.defaultFluid());
+    }
+    
+    public int height() {
+        return this.settings.noiseSettings().height();
+    }
+    
+    public int minY() {
+        return ((NoiseSettingsExtension) this.settings.noiseSettings()).minY();
     }
 }

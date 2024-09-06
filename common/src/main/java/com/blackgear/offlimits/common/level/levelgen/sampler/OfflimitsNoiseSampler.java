@@ -3,6 +3,7 @@ package com.blackgear.offlimits.common.level.levelgen.sampler;
 import com.blackgear.offlimits.common.level.levelgen.TerrainContext;
 import com.blackgear.offlimits.common.level.noise.BlendedNoise;
 import com.blackgear.offlimits.common.level.levelgen.noisemodifiers.NoiseModifier;
+import com.blackgear.offlimits.common.level.noise.NoiseSettingsExtension;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -63,7 +64,7 @@ public class OfflimitsNoiseSampler extends NoiseSampler {
     }
     
     private double applySlide(double density, int y) {
-        int startY = Mth.intFloorDiv(this.context.minY(), this.context.chunkHeight());
+        int startY = Mth.intFloorDiv(((NoiseSettingsExtension) this.settings).minY(), this.context.chunkHeight());
         int relativeY = y - startY;
         
         if (this.topSlideSize > 0.0) {
@@ -90,8 +91,8 @@ public class OfflimitsNoiseSampler extends NoiseSampler {
         int chunkX = Math.floorDiv(x, this.context.chunkWidth());
         int chunkZ = Math.floorDiv(z, this.context.chunkWidth());
         
-        int chunkY = Mth.intFloorDiv(this.context.minY(), this.context.chunkHeight());
-        int maxHeight = Mth.intFloorDiv(this.context.height(), this.context.chunkHeight());
+        int chunkY = Mth.intFloorDiv(((NoiseSettingsExtension) this.settings).minY(), this.context.chunkHeight());
+        int maxHeight = Mth.intFloorDiv(this.settings.height(), this.context.chunkHeight());
         
         int minSurfaceLevel = Integer.MAX_VALUE;
         

@@ -1,8 +1,8 @@
 package com.blackgear.offlimits.common.level;
 
-import com.blackgear.offlimits.Offlimits;
 import com.blackgear.offlimits.common.level.levelgen.sampler.NoiseSampler;
 import com.blackgear.offlimits.common.level.levelgen.stonesource.BaseStoneSource;
+import com.blackgear.offlimits.common.level.noise.NoiseSettingsExtension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -62,7 +62,7 @@ public interface Aquifer {
         private final NormalNoise barrierNoise;
         private final NormalNoise waterLevelNoise;
         private final NormalNoise lavaNoise;
-        private final NoiseGeneratorSettings noiseGeneratorSettings;
+        private final NoiseGeneratorSettings settings;
         private final AquiferStatus[] aquiferCache;
         private final long[] aquiferLocationCache;
         private boolean shouldScheduleFluidUpdate;
@@ -87,7 +87,7 @@ public interface Aquifer {
             this.waterLevelNoise = waterLevelNoise;
             this.lavaNoise = lavaNoise;
             
-            this.noiseGeneratorSettings = settings;
+            this.settings = settings;
             this.sampler = sampler;
             
             this.minGridX = this.gridX(chunkPos.getMinBlockX()) - 1;
@@ -244,7 +244,7 @@ public interface Aquifer {
         }
         
         private boolean isLavaLevel(int y) {
-            return y - Offlimits.CONFIG.worldGenMinY.get() <= 9;
+            return y - ((NoiseSettingsExtension) this.settings.noiseSettings()).minY() <= 9;
         }
         
         private double similarity(int firstDistance, int secondDistance) {
@@ -297,7 +297,7 @@ public interface Aquifer {
         }
         
         private AquiferStatus computeAquifer(int x, int y, int z) {
-            int seaLevel = this.noiseGeneratorSettings.seaLevel() - 1;
+            int seaLevel = this.settings.seaLevel() - 1;
             int surfaceLevel = this.sampler.getPreliminarySurfaceLevel(x, y, z);
             
             if (surfaceLevel < seaLevel && y > surfaceLevel - 8) {
@@ -335,24 +335,6 @@ public interface Aquifer {
         public AquiferStatus(int fluidLevel, BlockState fluidType) {
             this.fluidLevel = fluidLevel;
             this.fluidType = fluidType;
-        }
-    }
-    
-    interface  FluidPicker {
-        FluidStatus computeFluid(int x, int y, int z);
-    }
-    
-    class FluidStatus {
-        final int fluidLevel;
-        final BlockState fluidType;
-        
-        public FluidStatus(int fluidLevel, BlockState fluidType) {
-            this.fluidLevel = fluidLevel;
-            this.fluidType = fluidType;
-        }
-        
-        public BlockState at(int y) {
-            return y < this.fluidLevel ? this.fluidType : Blocks.AIR.defaultBlockState();
         }
     }
 }

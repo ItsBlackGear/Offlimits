@@ -2,6 +2,7 @@ accessWidener   v2  named
 
 extendable class net/minecraft/world/level/biome/Biome
 extendable class net/minecraft/client/multiplayer/ClientChunkCache$Storage
+extendable class net/minecraft/world/level/levelgen/NoiseGeneratorSettings
 
 accessible class net/minecraft/world/level/chunk/PaletteResize
 accessible class net/minecraft/server/level/ThreadedLevelLightEngine$TaskType

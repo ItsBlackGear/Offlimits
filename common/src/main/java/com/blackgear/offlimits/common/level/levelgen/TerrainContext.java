@@ -1,6 +1,7 @@
 package com.blackgear.offlimits.common.level.levelgen;
 
 import com.blackgear.offlimits.Offlimits;
+import com.blackgear.offlimits.common.level.noise.NoiseGeneratorSettingsExtension;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
@@ -60,10 +61,6 @@ public class TerrainContext {
         return this.seaLevel;
     }
     
-    public int height() {
-        return Offlimits.LEVEL.getHeight();
-    }
-    
     public int maxBuildHeight() {
         return Offlimits.LEVEL.getMaxBuildHeight();
     }
@@ -76,19 +73,23 @@ public class TerrainContext {
         return Offlimits.CONFIG.worldGenMinY.get();
     }
     
-    public boolean allowTerrainModifications() {
-        return Offlimits.CONFIG.allowTerrainModifications.get();
-    }
-    
     public boolean areNoiseCavesEnabled() {
-        return Offlimits.CONFIG.areNoiseCavesEnabled.get();
+        return ((NoiseGeneratorSettingsExtension) this.settings).noiseCavesEnabled();
     }
     
     public boolean areNoodleCavesEnabled() {
-        return Offlimits.CONFIG.areNoodleCavesEnabled.get();
+        return ((NoiseGeneratorSettingsExtension) this.settings).noodleCavesEnabled();
     }
     
     public boolean areAquifersEnabled() {
-        return Offlimits.CONFIG.areAquifersEnabled.get();
+        return ((NoiseGeneratorSettingsExtension) this.settings).aquifersEnabled();
+    }
+    
+    public boolean isDeepslateEnabled() {
+        return ((NoiseGeneratorSettingsExtension) this.settings).deepslateEnabled();
+    }
+    
+    public boolean areOreVeinsEnabled() {
+        return ((NoiseGeneratorSettingsExtension) this.settings).oreVeinsEnabled();
     }
 }
