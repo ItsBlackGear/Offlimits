@@ -2,11 +2,14 @@ package com.blackgear.offlimits.common.level.levelgen.chunk;
 
 import com.blackgear.offlimits.common.level.Aquifer;
 import com.blackgear.offlimits.common.level.levelgen.TerrainContext;
+import com.blackgear.offlimits.common.level.levelgen.WorldGenContext;
 import com.blackgear.offlimits.common.level.levelgen.sampler.NoiseSampler;
 import com.blackgear.offlimits.common.level.levelgen.sampler.OfflimitsNoiseSampler;
 import com.blackgear.offlimits.common.level.noise.BlendedNoise;
 import com.blackgear.offlimits.common.level.levelgen.noisemodifiers.NoiseModifier;
 import com.blackgear.offlimits.common.level.surface.BiomeExtension;
+import com.blackgear.offlimits.common.level.surface.WorldCarverExtension;
+import com.blackgear.offlimits.core.mixin.common.ConfiguredWorldCarverAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.BlockGetter;
@@ -14,17 +17,24 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.*;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.BitSet;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
+import java.util.function.Supplier;
 
 public abstract class NoiseChunk {
     protected final TerrainContext context;
@@ -109,17 +119,39 @@ public abstract class NoiseChunk {
         }
     }
     
-    public void applyCarvers(long seed, BiomeManager biomeManager, BiomeSource biomeSource, ChunkAccess chunk, GenerationStep.Carving carving) {
-    
+    public void applyCarvers(long seed, BiomeManager biomeManager, BiomeSource biomeSource, ChunkAccess chunk, GenerationStep.Carving carving, WorldGenContext context) {
+        BiomeManager biomeGetter = biomeManager.withDifferentSource(biomeSource);
+        WorldgenRandom random = new WorldgenRandom();
+        ChunkPos chunkPos = chunk.getPos();
+        int chunkX = chunkPos.x;
+        int chunkZ = chunkPos.z;
+        BiomeGenerationSettings generationSettings = biomeSource.getNoiseBiome(chunkPos.x << 2, 0, chunkPos.z << 2).getGenerationSettings();
+        BitSet carvingMask = ((ProtoChunk) chunk).getOrCreateCarvingMask(carving);
+        
+        for(int localX = chunkX - 8; localX <= chunkX + 8; ++localX) {
+            for(int localZ = chunkZ - 8; localZ <= chunkZ + 8; ++localZ) {
+                List<Supplier<ConfiguredWorldCarver<?>>> carvers = generationSettings.getCarvers(carving);
+                ListIterator<Supplier<ConfiguredWorldCarver<?>>> iterator = carvers.listIterator();
+                
+                while(iterator.hasNext()) {
+                    int index = iterator.nextIndex();
+                    ConfiguredWorldCarver<?> carver = iterator.next().get();
+                    WorldCarverExtension extension = ((WorldCarverExtension) ((ConfiguredWorldCarverAccessor) carver).getWorldCarver());
+                    extension.setAquifer(this.createAquifer(chunk));
+                    extension.setContext(context);
+                    
+                    random.setLargeFeatureSeed(seed + (long)index, localX, localZ);
+                    if (carver.isStartChunk(random, localX, localZ)) {
+                        carver.carve(chunk, biomeGetter::getBiome, random, this.context.seaLevel(), localX, localZ, chunkX, chunkZ, carvingMask);
+                    }
+                }
+            }
+        }
     }
     
-    public int getBaseHeight(int x, int z, Heightmap.Types types) {
-        return 0;
-    }
+    public abstract int getBaseHeight(int x, int z, Heightmap.Types types);
     
-    public BlockGetter getBaseColumn(int x, int z) {
-        return null;
-    }
+    public abstract BlockGetter getBaseColumn(int x, int z);
     
     double[] makeAndFillNoiseColumn(int x, int z, int minY, int chunkCountY) {
         double[] buffer = new double[chunkCountY + 1];
@@ -131,9 +163,7 @@ public abstract class NoiseChunk {
         this.sampler.fillNoiseColumn(buffer, x, z, this.settings.noiseSettings(), this.context.seaLevel(), minY, chunkCountY);
     }
     
-    public void fillFromNoise(LevelAccessor level, StructureFeatureManager structureManager, ChunkAccess chunk, int genDepth, int genHeight) {
-    
-    }
+    public abstract void fillFromNoise(LevelAccessor level, StructureFeatureManager structureManager, ChunkAccess chunk, int genDepth, int genHeight);
     
     public NoiseSampler createNoiseSampler(BiomeSource source, BlendedNoise blendedNoise, SimplexNoise islandNoise, PerlinNoise depthNoise, NoiseModifier caveNoiseModifier) {
         return new OfflimitsNoiseSampler(
@@ -148,6 +178,6 @@ public abstract class NoiseChunk {
     }
     
     public Aquifer createAquifer(ChunkAccess chunk) {
-        return Aquifer.createDisabled(this.context.seaLevel(), Blocks.WALL_TORCH.defaultBlockState());
+        return Aquifer.createDisabled(this.context.seaLevel(), this.context.defaultFluid());
     }
 }

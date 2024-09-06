@@ -2,16 +2,16 @@ package com.blackgear.offlimits.common.level.levelgen;
 
 import com.blackgear.offlimits.Offlimits;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
 public class TerrainContext {
-    private final BlockState defaultBlock, defaultFluid;
+    private final NoiseGeneratorSettings settings;
     private final int chunkCountX, chunkCountY, chunkCountZ;
     private final int chunkWidth, chunkHeight;
     private final int seaLevel;
     
     public TerrainContext(
-        BlockState defaultBlock,
-        BlockState defaultFluid,
+        NoiseGeneratorSettings settings,
         int chunkCountX,
         int chunkCountY,
         int chunkCountZ,
@@ -19,8 +19,7 @@ public class TerrainContext {
         int chunkHeight,
         int seaLevel
     ) {
-        this.defaultBlock = defaultBlock;
-        this.defaultFluid = defaultFluid;
+        this.settings = settings;
         this.chunkCountX = chunkCountX;
         this.chunkCountY = chunkCountY;
         this.chunkCountZ = chunkCountZ;
@@ -30,11 +29,11 @@ public class TerrainContext {
     }
     
     public BlockState defaultBlock() {
-        return this.defaultBlock;
+        return this.settings.getDefaultBlock();
     }
     
     public BlockState defaultFluid() {
-        return this.defaultFluid;
+        return this.settings.getDefaultFluid();
     }
     
     public int chunkCountX() {

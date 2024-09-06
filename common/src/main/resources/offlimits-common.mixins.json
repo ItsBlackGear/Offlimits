@@ -17,6 +17,7 @@
     "common.level.PoiManagerMixin",
     "common.level.PoiSectionAccessor",
     "common.level.ThreadedLevelLightEngineMixin",
+    "common.level.carver.WorldCarverAccessor",
     "common.level.carver.WorldCarverMixin",
     "common.level.chunk.ChunkAccessMixin",
     "common.level.chunk.ChunkGeneratorMixin",
