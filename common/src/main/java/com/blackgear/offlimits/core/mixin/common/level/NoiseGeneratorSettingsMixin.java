@@ -36,7 +36,7 @@ public class NoiseGeneratorSettingsMixin implements NoiseGeneratorSettingsExtens
             target = "(Lnet/minecraft/world/level/levelgen/StructureSettings;Lnet/minecraft/world/level/levelgen/NoiseSettings;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;IIIZ)Lnet/minecraft/world/level/levelgen/NoiseGeneratorSettings;"
         )
     )
-    private static NoiseGeneratorSettings a(
+    private static NoiseGeneratorSettings off$addOverworld(
         StructureSettings structures,
         NoiseSettings noise,
         BlockState defaultBlock,

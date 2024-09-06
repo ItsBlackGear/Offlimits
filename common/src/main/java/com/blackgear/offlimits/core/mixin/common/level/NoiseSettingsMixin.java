@@ -9,18 +9,7 @@ public class NoiseSettingsMixin implements NoiseSettingsExtension {
     @Mutable @Shadow @Final private int height;
     @Unique private int minY = 0;
     
-    @Override
-    public int minY() {
-        return this.minY;
-    }
-    
-    @Override
-    public void setMinY(int minY) {
-        this.minY = minY;
-    }
-    
-    @Override
-    public void setHeight(int height) {
-        this.height = height;
-    }
+    @Override public int minY() { return this.minY; }
+    @Override public void setMinY(int minY) { this.minY = minY; }
+    @Override public void setHeight(int height) { this.height = height; }
 }

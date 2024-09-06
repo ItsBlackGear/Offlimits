@@ -1,15 +1,16 @@
 package com.blackgear.offlimits.common.level.levelgen;
 
-import com.blackgear.offlimits.common.level.noise.NoiseSettingsExtension;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import com.blackgear.offlimits.common.level.levelgen.chunk.NoiseChunk;
 
 public final class WorldGenContext {
-    private final NoiseGeneratorSettings settings;
     private final TerrainContext context;
+    private final int minY;
+    private final int height;
     
-    public WorldGenContext(NoiseGeneratorSettings settings, TerrainContext context) {
-        this.settings = settings;
+    public WorldGenContext(NoiseChunk chunk, TerrainContext context) {
         this.context = context;
+        this.minY = Math.max(context.minBuildHeight(), chunk.minY());
+        this.height = Math.min(context.maxBuildHeight(), chunk.height());
     }
     
     public TerrainContext terrain() {
@@ -17,10 +18,10 @@ public final class WorldGenContext {
     }
     
     public int getMinGenY() {
-        return Math.max(this.context.minBuildHeight(), ((NoiseSettingsExtension) this.settings.noiseSettings()).minY());
+        return this.minY;
     }
     
     public int getGenDepth() {
-        return Math.min(this.context.maxBuildHeight(), this.settings.noiseSettings().height());
+        return this.height;
     }
 }

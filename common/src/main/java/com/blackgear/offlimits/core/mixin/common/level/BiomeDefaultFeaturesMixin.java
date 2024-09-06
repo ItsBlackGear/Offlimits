@@ -17,11 +17,20 @@ public class BiomeDefaultFeaturesMixin {
         at = @At("HEAD"),
         cancellable = true
     )
-    private static void offlimits$addOceanCarvers(BiomeGenerationSettings.Builder builder, CallbackInfo callback) {
-        if (Offlimits.CONFIG.allowTerrainModifications.get()) {
-            builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE);
-            builder.addCarver(GenerationStep.Carving.AIR, Carvers.CANYON);
-            callback.cancel();
-        }
+    private static void offl$addOceanCarvers(BiomeGenerationSettings.Builder builder, CallbackInfo callback) {
+        builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE);
+//        builder.addCarver(GenerationStep.Carving.AIR, Carvers.CANYON);
+        callback.cancel();
+    }
+    
+    @Inject(
+        method = "addDefaultCarvers",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private static void off$addDefaultCarvers(BiomeGenerationSettings.Builder builder, CallbackInfo callback) {
+        builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE);
+//        builder.addCarver(GenerationStep.Carving.AIR, Carvers.CANYON);
+        callback.cancel();
     }
 }

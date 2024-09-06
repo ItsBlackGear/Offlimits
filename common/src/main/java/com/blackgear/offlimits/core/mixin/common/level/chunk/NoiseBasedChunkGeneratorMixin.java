@@ -57,10 +57,11 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
         CallbackInfo callback
     ) {
         this.terrainContext = new TerrainContext(this.settings.get(), this.chunkCountX, this.chunkCountY, this.chunkCountZ, this.chunkWidth, this.chunkHeight, this.settings.get().seaLevel());
-        this.worldGenContext = new WorldGenContext(this.settings.get(), this.terrainContext);
         
         this.noiseChunk = new OfflimitsNoiseChunk(this.terrainContext, this.settings.get(), this.random);
         this.noiseChunk.initialize(biomeSource, seed, this.islandNoise, this.depthNoise);
+        
+        this.worldGenContext = new WorldGenContext(this.noiseChunk, this.terrainContext);
     }
     
     @Inject(

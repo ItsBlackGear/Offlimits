@@ -128,19 +128,19 @@ public abstract class NoiseChunk {
         int chunkZ = chunkPos.z;
         BiomeGenerationSettings generationSettings = biomeSource.getNoiseBiome(chunkPos.x << 2, 0, chunkPos.z << 2).getGenerationSettings();
         BitSet carvingMask = ((ProtoChunk) chunk).getOrCreateCarvingMask(carving);
-        
+
         for(int localX = chunkX - 8; localX <= chunkX + 8; ++localX) {
             for(int localZ = chunkZ - 8; localZ <= chunkZ + 8; ++localZ) {
                 List<Supplier<ConfiguredWorldCarver<?>>> carvers = generationSettings.getCarvers(carving);
                 ListIterator<Supplier<ConfiguredWorldCarver<?>>> iterator = carvers.listIterator();
-                
+
                 while(iterator.hasNext()) {
                     int index = iterator.nextIndex();
                     ConfiguredWorldCarver<?> carver = iterator.next().get();
                     WorldCarverExtension extension = ((WorldCarverExtension) ((ConfiguredWorldCarverAccessor) carver).getWorldCarver());
                     extension.setAquifer(this.createAquifer(chunk));
                     extension.setContext(context);
-                    
+
                     random.setLargeFeatureSeed(seed + (long)index, localX, localZ);
                     if (carver.isStartChunk(random, localX, localZ)) {
                         carver.carve(chunk, biomeGetter::getBiome, random, this.context.seaLevel(), localX, localZ, chunkX, chunkZ, carvingMask);

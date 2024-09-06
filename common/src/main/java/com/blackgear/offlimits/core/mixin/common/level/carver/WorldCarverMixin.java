@@ -1,6 +1,5 @@
 package com.blackgear.offlimits.core.mixin.common.level.carver;
 
-import com.blackgear.offlimits.Offlimits;
 import com.blackgear.offlimits.common.level.Aquifer;
 import com.blackgear.offlimits.common.level.levelgen.WorldGenContext;
 import com.blackgear.offlimits.common.level.levelgen.carver.NoiseCarver;
