@@ -1,7 +1,7 @@
 package com.blackgear.offlimits.core.mixin.common.level;
 
 import com.blackgear.offlimits.Offlimits;
-import com.blackgear.offlimits.common.level.surface.BiomeExtension;
+import com.blackgear.offlimits.common.level.chunk.surface.BiomeExtension;
 import net.minecraft.world.level.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

@@ -1,13 +1,16 @@
 package com.blackgear.offlimits.core.mixin.common.level.chunk;
 
-import com.blackgear.offlimits.common.level.levelgen.WorldGenContext;
-import com.blackgear.offlimits.common.level.levelgen.chunk.NoiseChunk;
-import com.blackgear.offlimits.common.level.levelgen.chunk.OfflimitsNoiseChunk;
-import com.blackgear.offlimits.common.level.levelgen.TerrainContext;
+import com.blackgear.offlimits.common.level.chunk.chunk.NoiseChunk;
+import com.blackgear.offlimits.common.level.chunk.chunk.NoiseChunkExtension;
+import com.blackgear.offlimits.common.level.chunk.chunk.OfflimitsNoiseChunk;
+import com.blackgear.offlimits.common.level.chunk.TerrainContext;
+import com.blackgear.offlimits.common.level.chunk.stonesource.BaseStoneSource;
+import com.blackgear.platform.common.worldgen.WorldGenerationContext;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.*;
@@ -24,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.function.Supplier;
 
 @Mixin(NoiseBasedChunkGenerator.class)
-public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
+public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator implements NoiseChunkExtension {
     @Shadow @Final private int chunkCountX;
     @Shadow @Final private int chunkCountY;
     @Shadow @Final private int chunkCountZ;
@@ -37,9 +40,14 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
     @Shadow @Final private SurfaceNoise surfaceNoise;
     @Shadow @Final private PerlinNoise depthNoise;
     
+    @Shadow @Final protected BlockState defaultBlock;
     @Unique private NoiseChunk noiseChunk;
     @Unique private TerrainContext terrainContext;
-    @Unique private WorldGenContext worldGenContext;
+    @Unique private WorldGenerationContext worldGenContext;
+    @Unique private BaseStoneSource stoneSource;
+    
+    @Override public BaseStoneSource getBaseStoneSource() { return this.stoneSource; }
+    @Override public void setBaseStoneSource(BaseStoneSource source) { this.stoneSource = source; }
     
     public NoiseBasedChunkGeneratorMixin(BiomeSource biomeSource, StructureSettings settings) {
         super(biomeSource, settings);
@@ -58,10 +66,11 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
     ) {
         this.terrainContext = new TerrainContext(this.settings.get(), this.chunkCountX, this.chunkCountY, this.chunkCountZ, this.chunkWidth, this.chunkHeight, this.settings.get().seaLevel());
         
-        this.noiseChunk = new OfflimitsNoiseChunk(this.terrainContext, this.settings.get(), this.random);
+        this.noiseChunk = new OfflimitsNoiseChunk((NoiseBasedChunkGenerator)(Object) this, this.terrainContext, this.settings.get(), this.random);
         this.noiseChunk.initialize(biomeSource, seed, this.islandNoise, this.depthNoise);
+        this.stoneSource = this.noiseChunk.getBaseNoiseSource();
         
-        this.worldGenContext = new WorldGenContext(this.noiseChunk, this.terrainContext);
+        this.worldGenContext = new WorldGenerationContext(this.noiseChunk);
     }
     
     @Inject(
@@ -104,7 +113,7 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator {
     )
     private void offlimits$fillFromNoise(LevelAccessor level, StructureFeatureManager structureManager, ChunkAccess chunk, CallbackInfo ci) {
         int genDepth = Math.max(this.noiseChunk.minY(), this.terrainContext.minBuildHeight());
-        int genHeight = Math.min(this.noiseChunk.minY() + this.noiseChunk.height(), this.terrainContext.maxBuildHeight());
+        int genHeight = Math.min(this.noiseChunk.minY() + this.noiseChunk.genDepth(), this.terrainContext.maxBuildHeight());
         
         this.noiseChunk.fillFromNoise(level, structureManager, chunk, genDepth, genHeight);
         ci.cancel();

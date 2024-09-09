@@ -1,9 +1,9 @@
 package com.blackgear.offlimits.core.mixin.common.level.carver;
 
-import com.blackgear.offlimits.common.level.Aquifer;
-import com.blackgear.offlimits.common.level.levelgen.WorldGenContext;
-import com.blackgear.offlimits.common.level.levelgen.carver.NoiseCarver;
-import com.blackgear.offlimits.common.level.surface.WorldCarverExtension;
+import com.blackgear.offlimits.common.level.chunk.Aquifer;
+import com.blackgear.offlimits.common.level.chunk.carver.NoiseCarver;
+import com.blackgear.offlimits.common.level.chunk.surface.WorldCarverExtension;
+import com.blackgear.platform.common.worldgen.WorldGenerationContext;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
@@ -25,13 +25,13 @@ public abstract class WorldCarverMixin<C> implements WorldCarverExtension {
     @Mutable @Shadow @Final protected int genHeight;
     
     @Unique private Aquifer aquifer;
-    @Unique private WorldGenContext context;
+    @Unique private WorldGenerationContext context;
     @Unique private NoiseCarver carver;
     
     @Override public void setAquifer(Aquifer aquifer) { this.aquifer = aquifer; }
     @Override public Aquifer aquifer() { return this.aquifer; }
-    @Override public void setContext(WorldGenContext context) { this.context = context; }
-    @Override public WorldGenContext context() { return context; }
+    @Override public void setContext(WorldGenerationContext context) { this.context = context; }
+    @Override public WorldGenerationContext context() { return context; }
     
     @Inject(method = "<init>", at = @At("RETURN"))
     private void offlimits$init(Codec<C> codec, int i, CallbackInfo ci) {

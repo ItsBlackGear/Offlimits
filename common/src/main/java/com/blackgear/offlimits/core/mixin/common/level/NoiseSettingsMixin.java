@@ -1,6 +1,6 @@
 package com.blackgear.offlimits.core.mixin.common.level;
 
-import com.blackgear.offlimits.common.level.noise.NoiseSettingsExtension;
+import com.blackgear.offlimits.common.level.chunk.noise.NoiseSettingsExtension;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import org.spongepowered.asm.mixin.*;
 
