@@ -4,7 +4,7 @@ import com.blackgear.offlimits.Offlimits;
 import com.blackgear.offlimits.common.level.chunk.Aquifer;
 import com.blackgear.offlimits.common.level.chunk.stonesource.SimpleStoneSource;
 import com.blackgear.offlimits.common.level.chunk.surface.WorldCarverExtension;
-import com.blackgear.offlimits.core.mixin.common.level.carver.WorldCarverAccessor;
+import com.blackgear.offlimits.core.mixin.common.access.WorldCarverAccessor;
 import com.blackgear.platform.common.worldgen.WorldGenerationContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

@@ -22,7 +22,7 @@ public class LevelMixin {
      * @reason
      */
     @Overwrite
-    public static boolean isOutsideBuildHeight(int i) {
-        return i < Offlimits.LEVEL.getMinBuildHeight() || i >= Offlimits.LEVEL.getMaxBuildHeight();
+    public static boolean isOutsideBuildHeight(int y) {
+        return y < Offlimits.LEVEL.getMinBuildHeight() || y >= Offlimits.LEVEL.getMaxBuildHeight();
     }
 }

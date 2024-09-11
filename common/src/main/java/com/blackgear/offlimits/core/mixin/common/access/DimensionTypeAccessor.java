@@ -1,4 +1,4 @@
-package com.blackgear.offlimits.core.mixin.common;
+package com.blackgear.offlimits.core.mixin.common.access;
 
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;

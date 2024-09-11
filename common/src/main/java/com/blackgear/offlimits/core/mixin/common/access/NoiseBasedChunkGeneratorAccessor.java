@@ -1,4 +1,4 @@
-package com.blackgear.offlimits.core.mixin.common.level;
+package com.blackgear.offlimits.core.mixin.common.access;
 
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;

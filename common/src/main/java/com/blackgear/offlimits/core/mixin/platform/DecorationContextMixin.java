@@ -1,7 +1,7 @@
 package com.blackgear.offlimits.core.mixin.platform;
 
 import com.blackgear.offlimits.common.level.chunk.noise.NoiseSettingsExtension;
-import com.blackgear.offlimits.core.mixin.common.level.NoiseBasedChunkGeneratorAccessor;
+import com.blackgear.offlimits.core.mixin.common.access.NoiseBasedChunkGeneratorAccessor;
 import com.blackgear.platform.common.worldgen.height.HeightHolder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;

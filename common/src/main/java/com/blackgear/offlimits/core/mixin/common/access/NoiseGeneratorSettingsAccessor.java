@@ -1,4 +1,4 @@
-package com.blackgear.offlimits.core.mixin.common.level;
+package com.blackgear.offlimits.core.mixin.common.access;
 
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;

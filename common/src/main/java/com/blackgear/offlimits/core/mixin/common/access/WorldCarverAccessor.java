@@ -1,4 +1,4 @@
-package com.blackgear.offlimits.core.mixin.common.level.carver;
+package com.blackgear.offlimits.core.mixin.common.access;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
