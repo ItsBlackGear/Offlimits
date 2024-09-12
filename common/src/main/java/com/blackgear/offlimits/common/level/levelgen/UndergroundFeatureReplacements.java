@@ -8,7 +8,6 @@ import com.blackgear.platform.common.worldgen.WorldGenRegistry;
 import com.blackgear.platform.common.worldgen.decorator.RangedConfiguration;
 import com.blackgear.platform.common.worldgen.height.VerticalAnchor;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.data.worldgen.Features;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -21,7 +20,7 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.Set;
 
-public class UndergroundFeatures {
+public class UndergroundFeatureReplacements {
     public static final WorldGenRegistry FEATURES = WorldGenRegistry.create(Offlimits.MOD_ID);
     
     public static final ConfiguredFeature<?, ?> LAKE_WATER = FEATURES.register(

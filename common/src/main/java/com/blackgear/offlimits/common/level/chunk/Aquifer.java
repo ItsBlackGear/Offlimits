@@ -1,8 +1,8 @@
 package com.blackgear.offlimits.common.level.chunk;
 
+import com.blackgear.offlimits.common.level.chunk.noise.NoiseSettingsExtension;
 import com.blackgear.offlimits.common.level.chunk.sampler.NoiseSampler;
 import com.blackgear.offlimits.common.level.chunk.stonesource.BaseStoneSource;
-import com.blackgear.offlimits.common.level.chunk.noise.NoiseSettingsExtension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -303,7 +303,7 @@ public interface Aquifer {
             if (surfaceLevel < seaLevel && y > surfaceLevel - 8) {
                 return new AquiferStatus(seaLevel, WATER);
             } else {
-                double waterLevelNoise = this.waterLevelNoise.getValue(Math.floorDiv(x, 64), Math.floorDiv(y, 40), Math.floorDiv(z, 64)) * 50.0 + -20.0;
+                double waterLevelNoise = this.waterLevelNoise.getValue(Math.floorDiv(x, 64), Math.floorDiv(y, 40), Math.floorDiv(z, 64)) * 50.0 - 20.0;
                 boolean isLava = false;
                 
                 if (waterLevelNoise > 4.0) {

@@ -11,6 +11,7 @@ public class WorldGeneration {
                 VanillaReplaceableFeatures.addDefaultSprings(writer, context);
                 VanillaReplaceableFeatures.addDefaultOres(writer, context);
                 VanillaReplaceableFeatures.addMonsterRoom(writer, context);
+                VanillaReplaceableFeatures.addDefaultCarvers(writer, context);
             }
         });
     }

@@ -1,28 +1,39 @@
 package com.blackgear.offlimits.common.level.levelgen;
 
 import com.blackgear.offlimits.Offlimits;
+import com.blackgear.platform.common.data.ModifiableList;
 import com.blackgear.platform.common.providers.math.UniformInt;
 import com.blackgear.platform.common.registry.PlatformFeatures;
 import com.blackgear.platform.common.worldgen.WorldGenRegistry;
 import com.blackgear.platform.common.worldgen.decorator.CountConfiguration;
-import com.blackgear.platform.common.worldgen.decorator.CountDecorator;
 import com.blackgear.platform.common.worldgen.decorator.RangedConfiguration;
 import com.blackgear.platform.common.worldgen.feature.OverlayOreConfiguration;
+import com.blackgear.platform.common.worldgen.feature.OverlayOreConfiguration.TargetBlockState;
 import com.blackgear.platform.common.worldgen.height.VerticalAnchor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration.Predicates;
 
-public class OreFeatures {
+import java.util.List;
+
+public class OreFeatureReplacements {
     public static final WorldGenRegistry FEATURES = WorldGenRegistry.create(Offlimits.MOD_ID);
+    
+    public static final List<TargetBlockState> COAL_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.COAL_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> IRON_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.IRON_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> GOLD_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.GOLD_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> REDSTONE_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.REDSTONE_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> DIAMOND_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.DIAMOND_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> LAPIS_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.LAPIS_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> EMERALD_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.EMERALD_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> INFESTED_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.INFESTED_STONE.defaultBlockState())).build();
     
     public static final ConfiguredFeature<?, ?> ORE_COAL_UPPER = FEATURES.register(
         "ore_coal_upper",
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.COAL_ORE.defaultBlockState(),
+                    COAL_TARGETS,
                     17
                 )
             )
@@ -35,8 +46,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.COAL_ORE.defaultBlockState(),
+                    COAL_TARGETS,
                     17,
                     0.5F
                 )
@@ -50,8 +60,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.IRON_ORE.defaultBlockState(),
+                    IRON_TARGETS,
                     9
                 )
             )
@@ -64,8 +73,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.IRON_ORE.defaultBlockState(),
+                    IRON_TARGETS,
                     9
                 )
             )
@@ -78,8 +86,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.IRON_ORE.defaultBlockState(),
+                    IRON_TARGETS,
                     4
                 )
             )
@@ -92,8 +99,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.GOLD_ORE.defaultBlockState(),
+                    GOLD_TARGETS,
                     9
                 )
             )
@@ -106,8 +112,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.GOLD_ORE.defaultBlockState(),
+                    GOLD_TARGETS,
                     9,
                     0.5F
                 )
@@ -121,8 +126,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.GOLD_ORE.defaultBlockState(),
+                    GOLD_TARGETS,
                     9,
                     0.5F
                 )
@@ -136,8 +140,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.REDSTONE_ORE.defaultBlockState(),
+                    REDSTONE_TARGETS,
                     8
                 )
             )
@@ -150,8 +153,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.REDSTONE_ORE.defaultBlockState(),
+                    REDSTONE_TARGETS,
                     8
                 )
             )
@@ -164,8 +166,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.DIAMOND_ORE.defaultBlockState(),
+                    DIAMOND_TARGETS,
                     4,
                     0.5F
                 )
@@ -179,8 +180,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.DIAMOND_ORE.defaultBlockState(),
+                    DIAMOND_TARGETS,
                     8,
                     0.5F
                 )
@@ -194,8 +194,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.DIAMOND_ORE.defaultBlockState(),
+                    DIAMOND_TARGETS,
                     12,
                     0.7F
                 )
@@ -209,8 +208,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.DIAMOND_ORE.defaultBlockState(),
+                    DIAMOND_TARGETS,
                     8,
                     1.0F
                 )
@@ -224,8 +222,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.LAPIS_ORE.defaultBlockState(),
+                    LAPIS_TARGETS,
                     7
                 )
             )
@@ -238,8 +235,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.LAPIS_ORE.defaultBlockState(),
+                    LAPIS_TARGETS,
                     7,
                     1.0F
                 )
@@ -253,8 +249,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.EMERALD_ORE.defaultBlockState(),
+                    EMERALD_TARGETS,
                     3
                 )
             )
@@ -267,8 +262,7 @@ public class OreFeatures {
         PlatformFeatures.OVERLAY_ORE.get()
             .configured(
                 new OverlayOreConfiguration(
-                    OreConfiguration.Predicates.NATURAL_STONE,
-                    Blocks.INFESTED_STONE.defaultBlockState(),
+                    INFESTED_TARGETS,
                     9
                 )
             )

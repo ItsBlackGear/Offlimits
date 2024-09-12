@@ -4,11 +4,6 @@
   "package": "com.blackgear.offlimits.core.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "compat.sodium.ChunkGraphCullerMixin",
-    "compat.sodium.ChunkRenderColumnMixin",
-    "compat.sodium.ChunkRenderManagerMixin",
-    "compat.sodium.ClonedChunkSectionMixin",
-    "compat.sodium.WorldSliceMixin"
   ],
   "client": [
     "client.DebugScreenOverlayMixin"
