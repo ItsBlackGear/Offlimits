@@ -8,11 +8,13 @@ import com.blackgear.platform.common.worldgen.WorldGenRegistry;
 import com.blackgear.platform.common.worldgen.decorator.RangedConfiguration;
 import com.blackgear.platform.common.worldgen.height.VerticalAnchor;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
 import net.minecraft.world.level.material.Fluids;
@@ -73,6 +75,14 @@ public class UndergroundFeatures {
             .decorated(RangedConfiguration.of(VeryBiasedToBottomHeight.of(VerticalAnchor.bottom(), VerticalAnchor.belowTop(8), 8)))
             .squared()
             .count(20)
+    );
+    public static final ConfiguredFeature<?, ?> MONSTER_ROOM = FEATURES.register(
+        "monster_room",
+        Feature.MONSTER_ROOM
+            .configured(FeatureConfiguration.NONE)
+            .decorated(Decorators.FULL_RANGE)
+            .squared()
+            .count(8)
     );
     
     

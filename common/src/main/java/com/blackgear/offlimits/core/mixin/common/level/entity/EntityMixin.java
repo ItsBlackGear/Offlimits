@@ -12,7 +12,7 @@ public class EntityMixin {
         method = "baseTick",
         constant = @Constant(doubleValue = -64.0)
     )
-    private double off$baseTick(double constant) {
+    private double off$voidDamageMinHeight(double constant) {
         return Offlimits.LEVEL.getMinBuildHeight() - 64.0;
     }
 }

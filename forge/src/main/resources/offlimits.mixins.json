@@ -4,8 +4,14 @@
   "package": "com.blackgear.offlimits.core.forge.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "compat.embeddium.ChunkGraphCullerMixin",
+    "compat.embeddium.ChunkRenderColumnMixin",
+    "compat.embeddium.ChunkRenderManagerMixin",
+    "compat.embeddium.ClonedChunkSectionMixin",
+    "compat.embeddium.WorldSliceMixin"
   ],
   "client": [
+    "client.DebugScreenOverlayMixin"
   ],
   "injectors": {
     "defaultRequire": 1

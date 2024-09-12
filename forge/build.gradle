@@ -34,7 +34,7 @@ dependencies {
 
     modApi "curse.maven:platform-997634:${rootProject.forge_platform_version}"
 
-//    modImplementation "curse.maven:embeddium-908741:4819799"
+    modImplementation "curse.maven:embeddium-908741:4819799"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }

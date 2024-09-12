@@ -29,7 +29,6 @@
     "common.level.chunk.LevelChunkMixin",
     "common.level.chunk.NoiseBasedChunkGeneratorMixin",
     "common.level.chunk.PalettedContainerAccessor",
-    "common.level.chunk.PalettedContainerMixin",
     "common.level.chunk.ProtoChunkMixin",
     "common.level.chunk.ProtoTickListMixin",
     "common.level.chunk.SectionStorageMixin",
@@ -60,10 +59,8 @@
   "client": [
     "client.ClientChunkCacheMixin",
     "client.ClientPacketListenerMixin",
-    "client.DebugScreenOverlayMixin",
     "client.LevelRendererMixin",
     "client.RenderChunkInfoAccessor",
-    "client.StorageAccessor",
     "client.ViewAreaAccessor",
     "client.ViewAreaMixin",
     "server.IntegratedServerMixin"

@@ -51,16 +51,19 @@ public class NaturalSpawnerMixin {
         int y = level.getHeight(SpawnPlacements.getHeightmapType(type), x, z);
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos(x, y, z);
         
+        // If the dimension has a ceiling, move down until an air block is found.
         if (level.dimensionType().hasCeiling()) {
             do {
                 mutable.move(Direction.DOWN);
             } while(!level.getBlockState(mutable).isAir());
             
+            // Continue moving down until a non-air block is found or the minimum build height is reached.
             do {
                 mutable.move(Direction.DOWN);
             } while(level.getBlockState(mutable).isAir() && mutable.getY() > Offlimits.LEVEL.getMinBuildHeight());
         }
         
+        // If the entity should be placed on the ground, check if the block below is pathfindable.
         if (SpawnPlacements.getPlacementType(type) == SpawnPlacements.Type.ON_GROUND) {
             BlockPos pos = mutable.below();
             if (level.getBlockState(pos).isPathfindable(level, pos, PathComputationType.LAND)) {

@@ -35,7 +35,11 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-//    modImplementation "maven.modrinth:sodium:mc1.16.5-0.2.0"
+    modRuntimeOnly("supercoder79:databreaker:0.2.7") {
+        transitive = false;
+    }
+
+    modImplementation "maven.modrinth:sodium:mc1.16.5-0.2.0"
 //    modCompileOnly "curse.maven:irisshaders-455508:3596178"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }

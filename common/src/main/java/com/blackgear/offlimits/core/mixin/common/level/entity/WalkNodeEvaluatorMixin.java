@@ -3,35 +3,101 @@ package com.blackgear.offlimits.core.mixin.common.level.entity;
 import com.blackgear.offlimits.Offlimits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.Node;
-import net.minecraft.world.level.pathfinder.NodeEvaluator;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.pathfinder.*;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(WalkNodeEvaluator.class)
 public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
     @Shadow public static double getFloorLevel(BlockGetter level, BlockPos pos) { throw new AssertionError(); }
     @Shadow protected abstract BlockPathTypes getCachedBlockType(Mob entity, int x, int y, int z);
+    @Shadow protected abstract BlockPathTypes getBlockPathType(Mob entity, BlockPos pos);
     @Shadow protected abstract boolean canReachWithoutCollision(Node arg);
     @Shadow protected abstract boolean hasCollisions(AABB arg);
     @Shadow protected static BlockPathTypes getBlockPathTypeRaw(BlockGetter arg, BlockPos arg2) { throw new AssertionError(); }
     @Shadow public static BlockPathTypes checkNeighbourBlocks(BlockGetter level, BlockPos.MutableBlockPos centerPos, BlockPathTypes nodeType) { throw new AssertionError(); }
+    @Shadow protected abstract boolean hasPositiveMalus(BlockPos arg);
     
-    @ModifyConstant(
-        method = "getStart",
-        constant = @Constant(intValue = 0)
-    )
-    private int off$setStartMinHeight(int constant) {
-        return Offlimits.LEVEL.getMinBuildHeight();
+    /**
+     * @author
+     * @reason
+     */
+    @Overwrite
+    public Node getStart() {
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        int y = Mth.floor(this.mob.getY());
+        BlockState state = this.level.getBlockState(mutable.set(this.mob.getX(), y, this.mob.getZ()));
+        
+        // Check if the entity can stand on the current fluid.
+        if (!this.mob.canStandOnFluid(state.getFluidState().getType())) {
+            // If the entity can float and is in water, find the surface level.
+            if (this.canFloat() && this.mob.isInWater()) {
+                while (true) {
+                    if (state.getBlock() != Blocks.WATER && state.getFluidState() != Fluids.WATER.getSource(false)) {
+                        y--;
+                        break;
+                    }
+                    
+                    state = this.level.getBlockState(mutable.set(this.mob.getX(), ++y, this.mob.getZ()));
+                }
+            } else if (this.mob.isOnGround()) {
+                // If the entity is on the ground, adjust the y-coordinate slightly.
+                y = Mth.floor(this.mob.getY() + 0.5);
+            } else {
+                // If the entity is in the air, find the nearest ground level.
+                BlockPos pos = this.mob.blockPosition();
+                
+                while (
+                    (this.level.getBlockState(pos).isAir() || this.level.getBlockState(pos).isPathfindable(this.level, pos, PathComputationType.LAND))
+                    && pos.getY() > Offlimits.LEVEL.getMinBuildHeight()
+                ) {
+                    pos = pos.below();
+                }
+                
+                y = pos.above().getY();
+            }
+        } else {
+            // If the entity can stand in the fluid, find the surface level.
+            while (this.mob.canStandOnFluid(state.getFluidState().getType())) {
+                state = this.level.getBlockState(mutable.set(this.mob.getX(), ++y, this.mob.getZ()));
+            }
+            
+            y--;
+        }
+        
+        BlockPos pos = this.mob.blockPosition();
+        BlockPathTypes blockPath = this.getCachedBlockType(this.mob, pos.getX(), y, pos.getZ());
+        
+        // Check if the pathfinding malus for the current path type is negative.
+        if (this.mob.getPathfindingMalus(blockPath) < 0.0F) {
+            AABB boundingBox = this.mob.getBoundingBox();
+            if (
+                this.hasPositiveMalus(mutable.set(boundingBox.minX, y, boundingBox.minZ))
+                || this.hasPositiveMalus(mutable.set(boundingBox.minX, y, boundingBox.maxZ))
+                || this.hasPositiveMalus(mutable.set(boundingBox.maxX, y, boundingBox.minZ))
+                || this.hasPositiveMalus(mutable.set(boundingBox.maxX, y, boundingBox.maxZ))
+            ) {
+                Node node = this.getNode(mutable);
+                node.type = this.getBlockPathType(this.mob, node.asBlockPos());
+                node.costMalus = this.mob.getPathfindingMalus(node.type);
+                return node;
+            }
+        }
+        
+        // Create and return the start node.
+        Node node = this.getNode(pos.getX(), y, pos.getZ());
+        node.type = this.getBlockPathType(this.mob, node.asBlockPos());
+        node.costMalus = this.mob.getPathfindingMalus(node.type);
+        return node;
     }
     
     /**
@@ -39,113 +105,141 @@ public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
      * @reason
      */
     @Overwrite
-    private Node getLandNode(int i, int j, int k, int l, double d, Direction direction, BlockPathTypes blockPathTypes) {
-        Node node = null;
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        double e = getFloorLevel(this.level, mutableBlockPos.set(i, j, k));
-        if (e - d > 1.125) {
+    private @Nullable Node getLandNode(int x, int y, int z, int steps, double surfaceLevel, Direction direction, BlockPathTypes blockPath) {
+        Node landNode = null;
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        double floorLevel = getFloorLevel(this.level, mutable.set(x, y, z));
+        
+        // If the floor level is too high compared to the surface level, return null.
+        if (floorLevel - surfaceLevel > 1.125) {
             return null;
         } else {
-            BlockPathTypes blockPathTypes2 = this.getCachedBlockType(this.mob, i, j, k);
-            float f = this.mob.getPathfindingMalus(blockPathTypes2);
-            double g = (double)this.mob.getBbWidth() / 2.0;
-            if (f >= 0.0F) {
-                node = this.getNode(i, j, k);
-                node.type = blockPathTypes2;
-                node.costMalus = Math.max(node.costMalus, f);
+            BlockPathTypes cachedBlockPath = this.getCachedBlockType(this.mob, x, y, z);
+            float pathfindingMalus = this.mob.getPathfindingMalus(cachedBlockPath);
+            double width = (double) this.mob.getBbWidth() / 2.0;
+            
+            // If the pathfinding malus is non-negative, create a new node.
+            if (pathfindingMalus >= 0.0F) {
+                landNode = this.getNode(x, y, z);
+                landNode.type = cachedBlockPath;
+                landNode.costMalus = Math.max(landNode.costMalus, pathfindingMalus);
             }
             
-            if (blockPathTypes == BlockPathTypes.FENCE && node != null && node.costMalus >= 0.0F && !this.canReachWithoutCollision(node)) {
-                node = null;
+            // If the block path is a fence and the node cannot be reached without a collision, set the node to null.
+            if (
+                blockPath == BlockPathTypes.FENCE
+                && landNode != null
+                && landNode.costMalus >= 0.0F
+                && !this.canReachWithoutCollision(landNode)
+            ) {
+                landNode = null;
             }
             
-            if (blockPathTypes2 != BlockPathTypes.WALKABLE) {
-                if ((node == null || node.costMalus < 0.0F)
-                    && l > 0
-                    && blockPathTypes2 != BlockPathTypes.FENCE
-                    && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL
-                    && blockPathTypes2 != BlockPathTypes.TRAPDOOR) {
-                    node = this.getLandNode(i, j + 1, k, l - 1, d, direction, blockPathTypes);
-                    if (node != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0F) {
-                        double h = (double) (i - direction.getStepX()) + 0.5;
-                        double m = (double) (k - direction.getStepZ()) + 0.5;
-                        AABB aABB = new AABB(
-                            h - g,
-                            getFloorLevel(this.level, mutableBlockPos.set(h, (double) (j + 1), m)) + 0.001,
-                            m - g,
-                            h + g,
-                            (double) this.mob.getBbHeight() + getFloorLevel(this.level, mutableBlockPos.set((double) node.x, (double) node.y, (double) node.z)) - 0.002,
-                            m + g
+            // If the cached block path is not walkable, attempt to find a walkable node.
+            if (cachedBlockPath != BlockPathTypes.WALKABLE) {
+                if (
+                    (landNode == null || landNode.costMalus < 0.0F)
+                    && steps > 0
+                    && cachedBlockPath != BlockPathTypes.FENCE
+                    && cachedBlockPath != BlockPathTypes.UNPASSABLE_RAIL
+                    && cachedBlockPath != BlockPathTypes.TRAPDOOR
+                ) {
+                    landNode = this.getLandNode(x, y + 1, z, steps - 1, surfaceLevel, direction, blockPath);
+                    
+                    // Check if the node is open or walkable and the entity's width is less than 1.0.
+                    if (
+                        landNode != null
+                        && (landNode.type == BlockPathTypes.OPEN || landNode.type == BlockPathTypes.WALKABLE)
+                        && this.mob.getBbWidth() < 1.0F
+                    ) {
+                        double xOffset = (double) (x - direction.getStepX()) + 0.5;
+                        double zOffset = (double) (z - direction.getStepZ()) + 0.5;
+                        
+                        // Create a bounding box for collision detection.
+                        AABB boundingBox = new AABB(
+                            xOffset - width,
+                            getFloorLevel(this.level, mutable.set(xOffset, y + 1, zOffset)) + 0.001,
+                            zOffset - width,
+                            xOffset + width,
+                            (double) this.mob.getBbHeight() + getFloorLevel(this.level, mutable.set(landNode.x, landNode.y, (double) landNode.z)) - 0.002,
+                            zOffset + width
                         );
-                        if (this.hasCollisions(aABB)) {
-                            node = null;
+                        
+                        // If there are no collisions, set the node to null.
+                        if (this.hasCollisions(boundingBox)) {
+                            landNode = null;
                         }
                     }
                 }
                 
-                if (blockPathTypes2 == BlockPathTypes.WATER && !this.canFloat()) {
-                    if (this.getCachedBlockType(this.mob, i, j - 1, k) != BlockPathTypes.WATER) {
-                        return node;
+                // If the cached block path is water and the entity cannot float, attempt to find a land node below.
+                if (cachedBlockPath == BlockPathTypes.WATER && !this.canFloat()) {
+                    if (this.getCachedBlockType(this.mob, x, y - 1, z) != BlockPathTypes.WATER) {
+                        return landNode;
                     }
                     
-                    while (j > Offlimits.LEVEL.getMinBuildHeight()) {
-                        blockPathTypes2 = this.getCachedBlockType(this.mob, i, --j, k);
-                        if (blockPathTypes2 != BlockPathTypes.WATER) {
+                    while (y > Offlimits.LEVEL.getMinBuildHeight()) {
+                        cachedBlockPath = this.getCachedBlockType(this.mob, x, y--, z);
+                        
+                        if (cachedBlockPath != BlockPathTypes.WATER) {
+                            return landNode;
+                        }
+                        
+                        landNode = this.getNode(x, y, z);
+                        landNode.type = cachedBlockPath;
+                        landNode.costMalus = Math.max(landNode.costMalus, this.mob.getPathfindingMalus(cachedBlockPath));
+                    }
+                }
+                
+                // If the cached block path is open, attempt to find a walkable node below.
+                if (cachedBlockPath == BlockPathTypes.OPEN) {
+                    int fallDistance = 0;
+                    int localY = y;
+                    
+                    while (cachedBlockPath == BlockPathTypes.OPEN) {
+                        if (y-- < Offlimits.LEVEL.getMinBuildHeight()) {
+                            Node node = this.getNode(x, localY, z);
+                            node.type = BlockPathTypes.BLOCKED;
+                            node.costMalus = -1.0F;
                             return node;
                         }
                         
-                        node = this.getNode(i, j, k);
-                        node.type = blockPathTypes2;
-                        node.costMalus = Math.max(node.costMalus, this.mob.getPathfindingMalus(blockPathTypes2));
-                    }
-                }
-                
-                if (blockPathTypes2 == BlockPathTypes.OPEN) {
-                    int n = 0;
-                    int o = j;
-                    
-                    while (blockPathTypes2 == BlockPathTypes.OPEN) {
-                        if (--j < Offlimits.LEVEL.getMinBuildHeight()) {
-                            Node node2 = this.getNode(i, o, k);
-                            node2.type = BlockPathTypes.BLOCKED;
-                            node2.costMalus = -1.0F;
-                            return node2;
+                        if (fallDistance++ >= this.mob.getMaxFallDistance()) {
+                            Node node = this.getNode(x, y, z);
+                            node.type = BlockPathTypes.BLOCKED;
+                            node.costMalus = -1.0F;
+                            return node;
                         }
                         
-                        if (n++ >= this.mob.getMaxFallDistance()) {
-                            Node node2 = this.getNode(i, j, k);
-                            node2.type = BlockPathTypes.BLOCKED;
-                            node2.costMalus = -1.0F;
-                            return node2;
-                        }
+                        cachedBlockPath = this.getCachedBlockType(this.mob, x, y, z);
+                        pathfindingMalus = this.mob.getPathfindingMalus(cachedBlockPath);
                         
-                        blockPathTypes2 = this.getCachedBlockType(this.mob, i, j, k);
-                        f = this.mob.getPathfindingMalus(blockPathTypes2);
-                        if (blockPathTypes2 != BlockPathTypes.OPEN && f >= 0.0F) {
-                            node = this.getNode(i, j, k);
-                            node.type = blockPathTypes2;
-                            node.costMalus = Math.max(node.costMalus, f);
+                        if (cachedBlockPath != BlockPathTypes.OPEN && pathfindingMalus >= 0.0F) {
+                            landNode = this.getNode(x, y, z);
+                            landNode.type = cachedBlockPath;
+                            landNode.costMalus = Math.max(landNode.costMalus, pathfindingMalus);
                             break;
                         }
                         
-                        if (f < 0.0F) {
-                            Node node2 = this.getNode(i, j, k);
-                            node2.type = BlockPathTypes.BLOCKED;
-                            node2.costMalus = -1.0F;
-                            return node2;
+                        if (pathfindingMalus < 0.0F) {
+                            Node node = this.getNode(x, y, z);
+                            node.type = BlockPathTypes.BLOCKED;
+                            node.costMalus = -1.0F;
+                            return node;
                         }
                     }
                 }
                 
-                if (blockPathTypes2 == BlockPathTypes.FENCE) {
-                    node = this.getNode(i, j, k);
-                    node.closed = true;
-                    node.type = blockPathTypes2;
-                    node.costMalus = blockPathTypes2.getMalus();
+                // If the cached block path is a fence, create a closed node.
+                if (cachedBlockPath == BlockPathTypes.FENCE) {
+                    landNode = this.getNode(x, y, z);
+                    landNode.closed = true;
+                    landNode.type = cachedBlockPath;
+                    landNode.costMalus = cachedBlockPath.getMalus();
                 }
                 
             }
-            return node;
+            return landNode;
         }
     }
     
@@ -155,39 +249,44 @@ public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
      */
     @Overwrite
     public static BlockPathTypes getBlockPathTypeStatic(BlockGetter level, BlockPos.MutableBlockPos pos) {
-        int i = pos.getX();
-        int j = pos.getY();
-        int k = pos.getZ();
-        BlockPathTypes blockPathTypes = getBlockPathTypeRaw(level, pos);
-        if (blockPathTypes == BlockPathTypes.OPEN && j >= Offlimits.LEVEL.getMinBuildHeight() + 1) {
-            BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(level, pos.set(i, j - 1, k));
-            blockPathTypes = blockPathTypes2 != BlockPathTypes.WALKABLE
-                && blockPathTypes2 != BlockPathTypes.OPEN
-                && blockPathTypes2 != BlockPathTypes.WATER
-                && blockPathTypes2 != BlockPathTypes.LAVA
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+        BlockPathTypes blockPath = getBlockPathTypeRaw(level, pos);
+        
+        // If the block path is open and the y-coordinate is above the min build height, check the block below.
+        if (blockPath == BlockPathTypes.OPEN && y >= Offlimits.LEVEL.getMinBuildHeight() + 1) {
+            BlockPathTypes blockPathBelow = getBlockPathTypeRaw(level, pos.set(x, y - 1, z));
+            blockPath = blockPathBelow != BlockPathTypes.WALKABLE
+                && blockPathBelow != BlockPathTypes.OPEN
+                && blockPathBelow != BlockPathTypes.WATER
+                && blockPathBelow != BlockPathTypes.LAVA
                 ? BlockPathTypes.WALKABLE
                 : BlockPathTypes.OPEN;
-            if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE) {
-                blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
+            
+            // Check for a specific block path below and update the block path accordingly.
+            if (blockPathBelow == BlockPathTypes.DAMAGE_FIRE) {
+                blockPath = BlockPathTypes.DAMAGE_FIRE;
             }
             
-            if (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS) {
-                blockPathTypes = BlockPathTypes.DAMAGE_CACTUS;
+            if (blockPathBelow == BlockPathTypes.DAMAGE_CACTUS) {
+                blockPath = BlockPathTypes.DAMAGE_CACTUS;
             }
             
-            if (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER) {
-                blockPathTypes = BlockPathTypes.DAMAGE_OTHER;
+            if (blockPathBelow == BlockPathTypes.DAMAGE_OTHER) {
+                blockPath = BlockPathTypes.DAMAGE_OTHER;
             }
             
-            if (blockPathTypes2 == BlockPathTypes.STICKY_HONEY) {
-                blockPathTypes = BlockPathTypes.STICKY_HONEY;
+            if (blockPathBelow == BlockPathTypes.STICKY_HONEY) {
+                blockPath = BlockPathTypes.STICKY_HONEY;
             }
         }
         
-        if (blockPathTypes == BlockPathTypes.WALKABLE) {
-            blockPathTypes = checkNeighbourBlocks(level, pos.set(i, j, k), blockPathTypes);
+        // If the block path is walkable, check the neighbouring blocks.
+        if (blockPath == BlockPathTypes.WALKABLE) {
+            blockPath = checkNeighbourBlocks(level, pos.set(x, y, z), blockPath);
         }
         
-        return blockPathTypes;
+        return blockPath;
     }
 }

@@ -20,21 +20,13 @@ import java.util.Set;
 @Mixin(PathNavigation.class)
 public abstract class PathNavigationMixin {
     @Shadow @Final protected Mob mob;
-    
-    @Shadow protected abstract boolean canUpdatePath();
-    
     @Shadow @Nullable protected Path path;
-    
     @Shadow @Final protected Level level;
-    
     @Shadow @Final private PathFinder pathFinder;
-    
     @Shadow private float maxVisitedNodesMultiplier;
-    
     @Shadow private BlockPos targetPos;
-    
     @Shadow private int reachRange;
-    
+    @Shadow protected abstract boolean canUpdatePath();
     @Shadow protected abstract void resetStuckTimeout();
     
     /**
@@ -44,21 +36,37 @@ public abstract class PathNavigationMixin {
     @Overwrite @Nullable
     public Path createPath(Set<BlockPos> targets, int regionOffset, boolean offsetUpward, int accuracy) {
         if (targets.isEmpty()) {
+            // If there are no targets, return null.
             return null;
         } else if (this.mob.getY() < (double) Offlimits.LEVEL.getMinBuildHeight()) {
+            // If the entity's Y-coordinate is below the minimum build height, return null.
             return null;
         } else if (!this.canUpdatePath()) {
+            // If the path cannot be updated, return null.
             return null;
         } else if (this.path != null && !this.path.isDone() && targets.contains(this.targetPos)) {
+            // Return the existing path if it is not done and the target position is in the targets set.
             return this.path;
         } else {
+            // Start profiling the pathfinding process.
             this.level.getProfiler().push("pathfind");
-            float f = (float)this.mob.getAttributeValue(Attributes.FOLLOW_RANGE);
-            BlockPos blockPos = offsetUpward ? this.mob.blockPosition().above() : this.mob.blockPosition();
-            int i = (int)(f + (float)regionOffset);
-            PathNavigationRegion pathNavigationRegion = new PathNavigationRegion(this.level, blockPos.offset(-i, -i, -i), blockPos.offset(i, i, i));
-            Path path = this.pathFinder.findPath(pathNavigationRegion, this.mob, targets, f, accuracy, this.maxVisitedNodesMultiplier);
+            
+            float followRange = (float) this.mob.getAttributeValue(Attributes.FOLLOW_RANGE);
+            BlockPos pos = offsetUpward
+                ? this.mob.blockPosition().above()
+                : this.mob.blockPosition();
+            int searchRadius = (int) (followRange + (float) regionOffset);
+            PathNavigationRegion region = new PathNavigationRegion(
+                this.level,
+                pos.offset(-searchRadius, -searchRadius, -searchRadius),
+                pos.offset(searchRadius, searchRadius, searchRadius)
+            );
+            Path path = this.pathFinder.findPath(region, this.mob, targets, followRange, accuracy, this.maxVisitedNodesMultiplier);
+            
+            // Stop profiling the pathfinding process.
             this.level.getProfiler().pop();
+            
+            // If a path is found, and it has a target, update the position and reach range, then reset the stuck timeout.
             if (path != null && path.getTarget() != null) {
                 this.targetPos = path.getTarget();
                 this.reachRange = accuracy;
