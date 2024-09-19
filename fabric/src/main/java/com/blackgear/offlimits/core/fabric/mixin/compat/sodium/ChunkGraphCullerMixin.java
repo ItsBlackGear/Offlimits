@@ -1,12 +1,12 @@
-package com.blackgear.offlimits.core.fabric.mixin.compat.sodium;
-
+//package com.blackgear.offlimits.core.fabric.mixin.compat.sodium;
+//
 //import com.blackgear.offlimits.Offlimits;
 //import me.jellysquid.mods.sodium.client.render.chunk.cull.graph.ChunkGraphCuller;
 //import org.spongepowered.asm.mixin.Mixin;
 //import org.spongepowered.asm.mixin.Pseudo;
 //import org.spongepowered.asm.mixin.injection.Constant;
 //import org.spongepowered.asm.mixin.injection.ModifyConstant;
-
+//
 //@Pseudo @Mixin(ChunkGraphCuller.class)
 //public class ChunkGraphCullerMixin {
 //    @ModifyConstant(

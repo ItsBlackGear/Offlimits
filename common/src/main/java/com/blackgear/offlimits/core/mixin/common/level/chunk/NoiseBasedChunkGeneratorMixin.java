@@ -88,6 +88,11 @@ public abstract class NoiseBasedChunkGeneratorMixin extends ChunkGenerator imple
         this.noiseChunk.applyCarvers(seed, biomeManager, this.biomeSource, chunk, carving, this.worldGenContext);
     }
     
+    @Override
+    public void applyBiomeDecoration(WorldGenRegion region, StructureFeatureManager structureManager) {
+        this.noiseChunk.applyBiomeDecoration(region, structureManager, biomeSource, (NoiseBasedChunkGenerator)(Object)this);
+    }
+    
     @Inject(
         method = "getBaseHeight",
         at = @At("HEAD"),

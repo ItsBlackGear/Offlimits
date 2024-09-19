@@ -38,6 +38,7 @@
     "common.level.entity.FlyNodeEvaluatorMixin",
     "common.level.entity.NaturalSpawnerMixin",
     "common.level.entity.PathNavigationMixin",
+    "common.level.entity.RandomPosMixin",
     "common.level.entity.WalkNodeEvaluatorMixin",
     "common.level.network.ClientboundLevelChunkPacketMixin",
     "common.level.structure.MineShaftPiecesMixin",

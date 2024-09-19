@@ -3,6 +3,7 @@ package com.blackgear.offlimits;
 import com.blackgear.offlimits.common.CommonSetup;
 import com.blackgear.offlimits.common.utils.HeightLimitAccess;
 import com.blackgear.offlimits.common.utils.LightLimitAccess;
+import com.blackgear.offlimits.core.registry.OfflimitsBlockTags;
 import com.blackgear.offlimits.core.registry.ModFeatures;
 import com.blackgear.platform.core.Environment;
 import com.blackgear.platform.core.ModInstance;
@@ -24,6 +25,7 @@ public class Offlimits {
 		INSTANCE.bootstrap();
 		validateHeightLevels();
 		
+		OfflimitsBlockTags.TAGS.instance();
 		ModFeatures.FEATURES.register();
 	}
 	

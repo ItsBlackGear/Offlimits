@@ -1,6 +1,7 @@
 package com.blackgear.offlimits.common.level.levelgen;
 
 import com.blackgear.offlimits.Offlimits;
+import com.blackgear.offlimits.core.registry.OfflimitsBlockTags;
 import com.blackgear.platform.common.data.ModifiableList;
 import com.blackgear.platform.common.providers.math.UniformInt;
 import com.blackgear.platform.common.registry.PlatformFeatures;
@@ -12,21 +13,21 @@ import com.blackgear.platform.common.worldgen.feature.OverlayOreConfiguration.Ta
 import com.blackgear.platform.common.worldgen.height.VerticalAnchor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration.Predicates;
+import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 
 import java.util.List;
 
 public class OreFeatureReplacements {
     public static final WorldGenRegistry FEATURES = WorldGenRegistry.create(Offlimits.MOD_ID);
     
-    public static final List<TargetBlockState> COAL_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.COAL_ORE.defaultBlockState())).build();
-    public static final List<TargetBlockState> IRON_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.IRON_ORE.defaultBlockState())).build();
-    public static final List<TargetBlockState> GOLD_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.GOLD_ORE.defaultBlockState())).build();
-    public static final List<TargetBlockState> REDSTONE_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.REDSTONE_ORE.defaultBlockState())).build();
-    public static final List<TargetBlockState> DIAMOND_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.DIAMOND_ORE.defaultBlockState())).build();
-    public static final List<TargetBlockState> LAPIS_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.LAPIS_ORE.defaultBlockState())).build();
-    public static final List<TargetBlockState> EMERALD_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.EMERALD_ORE.defaultBlockState())).build();
-    public static final List<TargetBlockState> INFESTED_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(Predicates.NATURAL_STONE, Blocks.INFESTED_STONE.defaultBlockState())).build();
+    public static final List<TargetBlockState> COAL_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(new TagMatchTest(OfflimitsBlockTags.STONE_ORE_REPLACEABLES), Blocks.COAL_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> IRON_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(new TagMatchTest(OfflimitsBlockTags.STONE_ORE_REPLACEABLES), Blocks.IRON_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> GOLD_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(new TagMatchTest(OfflimitsBlockTags.STONE_ORE_REPLACEABLES), Blocks.GOLD_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> REDSTONE_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(new TagMatchTest(OfflimitsBlockTags.STONE_ORE_REPLACEABLES), Blocks.REDSTONE_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> DIAMOND_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(new TagMatchTest(OfflimitsBlockTags.STONE_ORE_REPLACEABLES), Blocks.DIAMOND_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> LAPIS_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(new TagMatchTest(OfflimitsBlockTags.STONE_ORE_REPLACEABLES), Blocks.LAPIS_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> EMERALD_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(new TagMatchTest(OfflimitsBlockTags.STONE_ORE_REPLACEABLES), Blocks.EMERALD_ORE.defaultBlockState())).build();
+    public static final List<TargetBlockState> INFESTED_TARGETS = ModifiableList.<TargetBlockState>of().add(OverlayOreConfiguration.target(new TagMatchTest(OfflimitsBlockTags.STONE_ORE_REPLACEABLES), Blocks.INFESTED_STONE.defaultBlockState())).build();
     
     public static final ConfiguredFeature<?, ?> ORE_COAL_UPPER = FEATURES.register(
         "ore_coal_upper",

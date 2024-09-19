@@ -27,6 +27,7 @@ public class BulkSectionAccessMixin {
     @Inject(
         method = "getSection",
         at = @At("HEAD"),
+        remap = false,
         cancellable = true
     )
     private void off$getSection(BlockPos pos, CallbackInfoReturnable<LevelChunkSection> cir) {

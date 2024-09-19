@@ -8,12 +8,20 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(WorldGenerationContext.class)
 public class WorldGenerationContextMixin {
-    @ModifyConstant(method = "<init>", constant = @Constant(intValue = 256))
+    @ModifyConstant(
+        method = "<init>",
+        constant = @Constant(intValue = 256),
+        remap = false
+    )
     private int off$modifyHeight(int original) {
         return Offlimits.LEVEL.getHeight();
     }
     
-    @ModifyConstant(method = "<init>", constant = @Constant(intValue = 0))
+    @ModifyConstant(
+        method = "<init>",
+        constant = @Constant(intValue = 0),
+        remap = false
+    )
     private int off$modifyMinBuildHeight(int original) {
         return Offlimits.LEVEL.getMinBuildHeight();
     }

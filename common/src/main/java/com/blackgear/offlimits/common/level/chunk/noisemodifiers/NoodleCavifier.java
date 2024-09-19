@@ -1,7 +1,7 @@
 package com.blackgear.offlimits.common.level.chunk.noisemodifiers;
 
-import com.blackgear.offlimits.common.utils.MathUtils;
 import com.blackgear.offlimits.common.utils.NoiseUtils;
+import com.blackgear.platform.core.util.MathUtils;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import java.util.Random;

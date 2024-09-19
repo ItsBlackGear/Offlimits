@@ -1,5 +1,6 @@
 package com.blackgear.offlimits.common.utils;
 
+import com.blackgear.platform.core.util.MathUtils;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;

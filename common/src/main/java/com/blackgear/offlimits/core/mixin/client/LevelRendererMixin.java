@@ -31,8 +31,11 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Comparator;
 import java.util.List;
@@ -120,12 +123,12 @@ public abstract class LevelRendererMixin {
         return 4356 * Offlimits.LEVEL.getSectionsCount();
     }
     
-    /**
-     * @author
-     * @reason
-     */
-    @Overwrite
-    private void setupRender(Camera activeRenderInfo, Frustum camera, boolean debugCamera, int frameCount, boolean playerSpectator) {
+    @Inject(
+        method = "setupRender",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private void setupRender(Camera activeRenderInfo, Frustum camera, boolean debugCamera, int frameCount, boolean playerSpectator, CallbackInfo ci) {
         ViewAreaAccessor viewArea = (ViewAreaAccessor) this.viewArea;
         Vec3 vec3 = activeRenderInfo.getPosition();
         if (this.minecraft.options.renderDistance != this.lastViewDistance) {
@@ -253,6 +256,8 @@ public abstract class LevelRendererMixin {
         
         this.chunksToCompile.addAll(set);
         this.minecraft.getProfiler().pop();
+        
+        ci.cancel();
     }
     
     /**

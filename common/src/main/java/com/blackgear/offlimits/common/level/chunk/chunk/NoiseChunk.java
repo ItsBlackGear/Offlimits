@@ -13,6 +13,8 @@ import com.blackgear.offlimits.common.level.chunk.surface.WorldCarverExtension;
 import com.blackgear.offlimits.core.mixin.common.access.ConfiguredWorldCarverAccessor;
 import com.blackgear.platform.common.worldgen.WorldGenerationContext;
 import com.blackgear.platform.common.worldgen.height.HeightHolder;
+import net.minecraft.CrashReport;
+import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.BlockGetter;
@@ -153,6 +155,25 @@ public abstract class NoiseChunk implements HeightHolder {
                     }
                 }
             }
+        }
+    }
+    
+    public void applyBiomeDecoration(WorldGenRegion region, StructureFeatureManager structureManager, BiomeSource biomeSource, ChunkGenerator generator) {
+        int i = region.getCenterX();
+        int j = region.getCenterZ();
+        int k = i * 16;
+        int l = j * 16;
+        BlockPos blockPos = new BlockPos(k, 0, l);
+        Biome biome = biomeSource.getNoiseBiome((i << 2) + 2, 2, (j << 2) + 2);
+        WorldgenRandom worldgenRandom = new WorldgenRandom();
+        long m = worldgenRandom.setDecorationSeed(region.getSeed(), k, l);
+        
+        try {
+            biome.generate(structureManager, generator, region, m, worldgenRandom, blockPos);
+        } catch (Exception var14) {
+            CrashReport crashReport = CrashReport.forThrowable(var14, "Biome decoration");
+            crashReport.addCategory("Generation").setDetail("CenterX", i).setDetail("CenterZ", j).setDetail("Seed", m).setDetail("Biome", biome);
+            throw new ReportedException(crashReport);
         }
     }
     
