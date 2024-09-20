@@ -13,18 +13,13 @@ public class BiomeMixin implements BiomeExtension {
     @Unique private int preliminarySurfaceLevel;
     
     @ModifyConstant(
-        method = "shouldSnow",
+        method = {
+            "shouldSnow",
+            "shouldFreeze(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Z)Z"
+        },
         constant = @Constant(intValue = 256)
     )
-    private int offlimits$shouldSnow(int original) {
-        return Offlimits.LEVEL.getMaxBuildHeight();
-    }
-    
-    @ModifyConstant(
-        method = "shouldFreeze(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Z)Z",
-        constant = @Constant(intValue = 256)
-    )
-    private int offlimits$shouldFreeze(int original) {
+    private int offlimits$shouldSnowOrFreeze(int original) {
         return Offlimits.LEVEL.getMaxBuildHeight();
     }
     

@@ -12,6 +12,8 @@ public class OfflimitsConfig {
     public final ConfigBuilder.ConfigValue<Boolean> areNoiseCavesEnabled;
     public final ConfigBuilder.ConfigValue<Boolean> areAquifersEnabled;
     public final ConfigBuilder.ConfigValue<Boolean> areNoodleCavesEnabled;
+    public final ConfigBuilder.ConfigValue<Boolean> areOreVeinsEnabled;
+    public final ConfigBuilder.ConfigValue<Boolean> isDeepslateEnabled;
     
     public OfflimitsConfig(ConfigBuilder builder) {
         builder.push("height");
@@ -28,6 +30,8 @@ public class OfflimitsConfig {
             this.areNoiseCavesEnabled = builder.comment("Toggle noise cave generation.\n[!] Requires terrain modifications to be enabled").define("areNoiseCavesEnabled", true);
             this.areAquifersEnabled = builder.comment("Toggle aquifer generation.\n[!] Requires terrain modifications to be enabled").define("areAquifersEnabled", true);
             this.areNoodleCavesEnabled = builder.comment("Toggle noodle cave generation.\n[!] Requires terrain modifications to be enabled").define("areNoodleCavesEnabled", true);
+            this.areOreVeinsEnabled = builder.comment("Toggle ore vein generation.\n[!] Doesn't do anything by itself, it requires a mod that allows Ore Veins Generation\n[!] Requires terrain modifications to be enabled").define("areOreVeinsEnabled", true);
+            this.isDeepslateEnabled = builder.comment("Toggle deepslate generation.\n[!] Doesn't do anything by itself, it requires a mod that allows Deepslate Generation\n[!] Requires terrain modifications to be enabled").define("isDeepslateEnabled", true);
         builder.pop();
     }
 }

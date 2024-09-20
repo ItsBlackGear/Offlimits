@@ -31,7 +31,6 @@
     "common.level.chunk.ProtoChunkMixin",
     "common.level.chunk.ProtoTickListMixin",
     "common.level.chunk.SectionStorageMixin",
-    "common.level.chunk.UpgradeDataAccessor",
     "common.level.chunk.UpgradeDataMixin",
     "common.level.entity.BatMixin",
     "common.level.entity.EntityMixin",

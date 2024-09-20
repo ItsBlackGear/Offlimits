@@ -3,10 +3,8 @@ package com.blackgear.offlimits.core.mixin.common.level.chunk;
 import com.blackgear.offlimits.Offlimits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Direction8;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,24 +17,14 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-
-import java.util.EnumSet;
-import java.util.Set;
 
 @Mixin(PalettedContainer.class)
 interface PalettedContainerAccessor {
     @Invoker
     <T> T callGet(int index);
-}
-
-@Mixin(UpgradeData.class)
-interface UpgradeDataAccessor {
-    @Accessor
-    EnumSet<Direction8> getSides();
 }
 
 @Mixin(UpgradeData.class)
@@ -54,40 +42,12 @@ public abstract class UpgradeDataMixin {
         return Offlimits.LEVEL.getSectionsCount();
     }
     
-    /**
-     * @author
-     * @reason
-     */
-    @Overwrite
-    private static void upgradeSides(LevelChunk chunk, Direction8 direction8) {
-        Level level = chunk.getLevel();
-        if (((UpgradeDataAccessor) chunk.getUpgradeData()).getSides().remove(direction8)) {
-            Set<Direction> set = direction8.getDirections();
-            boolean bl = set.contains(Direction.EAST);
-            boolean bl2 = set.contains(Direction.WEST);
-            boolean bl3 = set.contains(Direction.SOUTH);
-            boolean bl4 = set.contains(Direction.NORTH);
-            boolean bl5 = set.size() == 1;
-            ChunkPos chunkPos = chunk.getPos();
-            int k = chunkPos.getMinBlockX() + (!bl5 || !bl4 && !bl3 ? (bl2 ? 0 : 15) : 1);
-            int l = chunkPos.getMinBlockX() + (!bl5 || !bl4 && !bl3 ? (bl2 ? 0 : 15) : 14);
-            int m = chunkPos.getMinBlockZ() + (!bl5 || !bl && !bl2 ? (bl4 ? 0 : 15) : 1);
-            int n = chunkPos.getMinBlockZ() + (!bl5 || !bl && !bl2 ? (bl4 ? 0 : 15) : 14);
-            Direction[] directions = Direction.values();
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-            for (BlockPos blockPos : BlockPos.betweenClosed(k, Offlimits.LEVEL.getMinBuildHeight(), m, l, Offlimits.LEVEL.getMaxBuildHeight() - 1, n)) {
-                BlockState blockState = level.getBlockState(blockPos);
-                BlockState blockState2 = blockState;
-
-                for(Direction direction : directions) {
-                    mutableBlockPos.setWithOffset(blockPos, direction);
-                    blockState2 = updateState(blockState2, direction, level, blockPos, mutableBlockPos);
-                }
-
-                Block.updateOrDestroy(blockState, blockState2, level, blockPos, 18);
-            }
-        }
+    @ModifyConstant(
+        method = "upgradeSides",
+        constant = @Constant(intValue = 0, ordinal = 6)
+    )
+    private static int upgradeSides(int constant) {
+        return Offlimits.LEVEL.getMinBuildHeight();
     }
     
     /**

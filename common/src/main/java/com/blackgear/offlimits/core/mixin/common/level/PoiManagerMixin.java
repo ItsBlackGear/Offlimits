@@ -40,6 +40,7 @@ public class PoiManagerMixin extends SectionStorage<PoiSection> {
     public PoiManagerMixin(File file, Function<Runnable, Codec<PoiSection>> function, Function<Runnable, PoiSection> function2, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean bl) {
         super(file, function, function2, dataFixer, dataFixTypes, bl);
     }
+    
     @ModifyConstant(
         method = "getInChunk",
         constant = @Constant(intValue = 16)

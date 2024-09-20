@@ -37,7 +37,7 @@ public class NoiseGeneratorSettingsMixin implements NoiseGeneratorSettingsExtens
             target = "(Lnet/minecraft/world/level/levelgen/StructureSettings;Lnet/minecraft/world/level/levelgen/NoiseSettings;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;IIIZ)Lnet/minecraft/world/level/levelgen/NoiseGeneratorSettings;"
         )
     )
-    private static NoiseGeneratorSettings off$addOverworld(
+    private static NoiseGeneratorSettings offlimits$addOverworldTerrainModifications(
         StructureSettings structures,
         NoiseSettings noise,
         BlockState defaultBlock,
@@ -62,8 +62,8 @@ public class NoiseGeneratorSettingsMixin implements NoiseGeneratorSettingsExtens
             NoiseGeneratorSettingsExtension extension = (NoiseGeneratorSettingsExtension) settings;
             extension.setAquifersEnabled(Offlimits.CONFIG.areAquifersEnabled.get());
             extension.setNoiseCavesEnabled(Offlimits.CONFIG.areNoiseCavesEnabled.get());
-            extension.setDeepslateEnabled(true);
-            extension.setOreVeinsEnabled(true);
+            extension.setDeepslateEnabled(Offlimits.CONFIG.isDeepslateEnabled.get());
+            extension.setOreVeinsEnabled(Offlimits.CONFIG.areOreVeinsEnabled.get());
             extension.setNoodleCavesEnabled(Offlimits.CONFIG.areNoiseCavesEnabled.get());
         }
         
@@ -77,7 +77,7 @@ public class NoiseGeneratorSettingsMixin implements NoiseGeneratorSettingsExtens
             target = "(ILnet/minecraft/world/level/levelgen/NoiseSamplingSettings;Lnet/minecraft/world/level/levelgen/NoiseSlideSettings;Lnet/minecraft/world/level/levelgen/NoiseSlideSettings;IIDDZZZZ)Lnet/minecraft/world/level/levelgen/NoiseSettings;"
         )
     )
-    private static NoiseSettings off$increaseOverworldHeight(
+    private static NoiseSettings offlimits$increaseOverworldHeight(
         int height,
         NoiseSamplingSettings sampling,
         NoiseSlideSettings topSlide,
