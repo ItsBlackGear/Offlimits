@@ -1,4 +1,4 @@
-package com.blackgear.offlimits.core.mixin.client;
+package com.blackgear.offlimits.core.mixin.common.level.network;
 
 import com.blackgear.offlimits.Offlimits;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
@@ -16,18 +16,28 @@ public class ClientboundLightUpdatePacketMixin {
         },
         constant = @Constant(intValue = 18)
     )
-    private int off$updateLightSectionsCount(int constant) {
+    private int offlimits$updateTotalLightSections(int constant) {
         return Offlimits.LIGHT.getLightSectionCount();
     }
     
     @ModifyConstant(
         method = {
-            "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;Z)V",
-            "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;IIZ)V"
+            "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;Z)V"
         },
         constant = @Constant(intValue = -1)
     )
-    private int off$initMinLightSections(int constant) {
+    private int offlimits$updateMinLightSectionsFromChunkMap(int constant) {
+        return Offlimits.LIGHT.getMinLightSection();
+    }
+    
+    @ModifyConstant(
+        method = "<init>(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/lighting/LevelLightEngine;IIZ)V",
+        constant = {
+            @Constant(intValue = -1, ordinal = 0),
+            @Constant(intValue = -1, ordinal = 2)
+        }
+    )
+    private int offlimits$updateMinLightSectionsFromChunkHolder(int constant) {
         return Offlimits.LIGHT.getMinLightSection();
     }
 }

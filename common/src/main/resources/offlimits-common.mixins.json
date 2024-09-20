@@ -4,7 +4,7 @@
   "package": "com.blackgear.offlimits.core.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "client.ClientboundLightUpdatePacketMixin",
+    "common.level.network.ClientboundLightUpdatePacketMixin",
     "common.access.ConfiguredWorldCarverAccessor",
     "common.access.DimensionTypeAccessor",
     "common.access.NoiseBasedChunkGeneratorAccessor",

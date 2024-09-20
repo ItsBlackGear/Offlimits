@@ -21,8 +21,8 @@ import java.util.function.ToDoubleFunction;
 
 @Mixin(RandomPos.class)
 public abstract class RandomPosMixin {
-    @Shadow @Nullable private static BlockPos getRandomDelta(Random random, int i, int j, int k, @Nullable Vec3 vec3, double d) { return null; }
-    @Shadow static BlockPos moveUpToAboveSolid(BlockPos blockPos, int i, int j, Predicate<BlockPos> predicate) { return null; }
+    @Shadow @Nullable private static BlockPos getRandomDelta(Random random, int horizontalRange, int verticalRange, int additionalHeight, @Nullable Vec3 offset, double angleRange) { return null; }
+    @Shadow static BlockPos moveUpToAboveSolid(BlockPos pos, int minY, int maxY, Predicate<BlockPos> predicate) { return null; }
     
     @Inject(
         method = "generateRandomPos",
@@ -31,82 +31,84 @@ public abstract class RandomPosMixin {
     )
     private static void offlimits$generateRandomPos(
         PathfinderMob mob,
-        int x,
-        int z,
-        int k,
-        @Nullable Vec3 vec3,
-        boolean bl,
-        double d,
-        ToDoubleFunction<BlockPos> toDoubleFunction,
-        boolean bl2,
-        int l,
-        int m,
-        boolean bl3,
+        int horizontalRange,
+        int verticalRange,
+        int additionalHeight,
+        @Nullable Vec3 offset,
+        boolean avoidWater,
+        double angleRange,
+        ToDoubleFunction<BlockPos> scoreFunction,
+        boolean moveAroundSolid,
+        int maxSolidMove,
+        int minSolidMove,
+        boolean checkStableDestination,
         CallbackInfoReturnable<Vec3> cir
     ) {
         PathNavigation navigation = mob.getNavigation();
         Random random = mob.getRandom();
-        boolean bl4;
-        if (mob.hasRestriction()) {
-            bl4 = mob.getRestrictCenter().closerThan(mob.position(), (double)(mob.getRestrictRadius() + (float)x) + 1.0);
-        } else {
-            bl4 = false;
-        }
         
-        boolean bl5 = false;
-        double e = Double.NEGATIVE_INFINITY;
-        BlockPos blockPos = mob.blockPosition();
+        boolean withinRestriction = mob.hasRestriction() && mob.getRestrictCenter().closerThan(mob.position(), (double) (mob.getRestrictRadius() + (float) horizontalRange) + 1.0);
         
-        for(int n = 0; n < 10; ++n) {
-            BlockPos blockPos2 = getRandomDelta(random, x, z, k, vec3, d);
-            if (blockPos2 != null) {
-                int o = blockPos2.getX();
-                int p = blockPos2.getY();
-                int q = blockPos2.getZ();
-                if (mob.hasRestriction() && x > 1) {
-                    BlockPos blockPos3 = mob.getRestrictCenter();
-                    if (mob.getX() > (double)blockPos3.getX()) {
-                        o -= random.nextInt(x / 2);
-                    } else {
-                        o += random.nextInt(x / 2);
-                    }
-                    
-                    if (mob.getZ() > (double)blockPos3.getZ()) {
-                        q -= random.nextInt(x / 2);
-                    } else {
-                        q += random.nextInt(x / 2);
-                    }
+        boolean foundValidPos = false;
+        double highestScore = Double.NEGATIVE_INFINITY;
+        BlockPos bestPos = mob.blockPosition();
+        
+        for(int i = 0; i < 10; ++i) {
+            BlockPos deltaPos = getRandomDelta(random, horizontalRange, verticalRange, additionalHeight, offset, angleRange);
+            
+            if (deltaPos == null) continue;
+            
+            int deltaX = deltaPos.getX();
+            int deltaY = deltaPos.getY();
+            int deltaZ = deltaPos.getZ();
+            
+            if (mob.hasRestriction() && horizontalRange > 1) {
+                BlockPos restrictCenter = mob.getRestrictCenter();
+                
+                if (mob.getX() > (double) restrictCenter.getX()) {
+                    deltaX -= random.nextInt(horizontalRange / 2);
+                } else {
+                    deltaX += random.nextInt(horizontalRange / 2);
                 }
                 
-                BlockPos blockPos3 = new BlockPos((double)o + mob.getX(), (double)p + mob.getY(), (double)q + mob.getZ());
-                if (blockPos3.getY() >= Offlimits.LEVEL.getMinBuildHeight()
-                    && blockPos3.getY() <= mob.level.getMaxBuildHeight()
-                    && (!bl4 || mob.isWithinRestriction(blockPos3))
-                    && (!bl3 || navigation.isStableDestination(blockPos3))) {
-                    if (bl2) {
-                        blockPos3 = moveUpToAboveSolid(
-                            blockPos3,
-                            random.nextInt(l + 1) + m,
-                            mob.level.getMaxBuildHeight(),
-                            blockPosx -> mob.level.getBlockState(blockPosx).getMaterial().isSolid()
-                        );
-                    }
-                    
-                    if (bl || !mob.level.getFluidState(blockPos3).is(FluidTags.WATER)) {
-                        BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(mob.level, blockPos3.mutable());
-                        if (mob.getPathfindingMalus(blockPathTypes) == 0.0F) {
-                            double f = toDoubleFunction.applyAsDouble(blockPos3);
-                            if (f > e) {
-                                e = f;
-                                blockPos = blockPos3;
-                                bl5 = true;
-                            }
+                if (mob.getZ() > (double) restrictCenter.getZ()) {
+                    deltaZ -= random.nextInt(horizontalRange / 2);
+                } else {
+                    deltaZ += random.nextInt(horizontalRange / 2);
+                }
+            }
+            
+            BlockPos candidatePos = new BlockPos((double)deltaX + mob.getX(), (double)deltaY + mob.getY(), (double)deltaZ + mob.getZ());
+            
+            if (
+                candidatePos.getY() >= Offlimits.LEVEL.getMinBuildHeight()
+                && candidatePos.getY() <= mob.level.getMaxBuildHeight()
+                && (!withinRestriction || mob.isWithinRestriction(candidatePos))
+                && (!checkStableDestination || navigation.isStableDestination(candidatePos))
+            ) {
+                if (moveAroundSolid) {
+                    candidatePos = moveUpToAboveSolid(
+                        candidatePos,
+                        random.nextInt(maxSolidMove + 1) + minSolidMove,
+                        mob.level.getMaxBuildHeight(),
+                        pos -> mob.level.getBlockState(pos).getMaterial().isSolid()
+                    );
+                }
+                
+                if (avoidWater || !mob.level.getFluidState(candidatePos).is(FluidTags.WATER)) {
+                    BlockPathTypes blockPath = WalkNodeEvaluator.getBlockPathTypeStatic(mob.level, candidatePos.mutable());
+                    if (mob.getPathfindingMalus(blockPath) == 0.0F) {
+                        double score = scoreFunction.applyAsDouble(candidatePos);
+                        if (score > highestScore) {
+                            highestScore = score;
+                            bestPos = candidatePos;
+                            foundValidPos = true;
                         }
                     }
                 }
             }
         }
         
-        cir.setReturnValue(bl5 ? Vec3.atBottomCenterOf(blockPos) : null);
+        cir.setReturnValue(foundValidPos ? Vec3.atBottomCenterOf(bestPos) : null);
     }
 }
