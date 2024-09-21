@@ -11,6 +11,7 @@ public class WorldGeneration {
                 VanillaReplaceableFeatures.addDefaultLakes(writer, context);
                 VanillaReplaceableFeatures.addDefaultSprings(writer, context);
                 VanillaReplaceableFeatures.addDefaultOres(writer, context);
+                VanillaReplaceableFeatures.addDefaultStonesAndSoils(writer, context);
                 VanillaReplaceableFeatures.addMonsterRoom(writer, context);
                 VanillaReplaceableFeatures.addDefaultCarvers(writer, context);
             }

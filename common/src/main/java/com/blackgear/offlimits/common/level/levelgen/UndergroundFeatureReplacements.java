@@ -14,6 +14,7 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
 import net.minecraft.world.level.material.Fluids;
@@ -22,6 +23,7 @@ import java.util.Set;
 
 public class UndergroundFeatureReplacements {
     public static final WorldGenRegistry FEATURES = WorldGenRegistry.create(Offlimits.MOD_ID);
+    public static final ConfiguredDecorator<?> UNDERGROUND_RANGE = RangedConfiguration.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(0));
     
     public static final ConfiguredFeature<?, ?> LAKE_WATER = FEATURES.register(
         "lake_water",
@@ -83,7 +85,71 @@ public class UndergroundFeatureReplacements {
             .squared()
             .count(8)
     );
-    
+    public static final ConfiguredFeature<?, ?> ORE_DIRT_LOWER = FEATURES.register(
+        "ore_dirt_lower",
+        Feature.ORE.configured(
+            new OreConfiguration(
+                OreConfiguration.Predicates.NATURAL_STONE,
+                Blocks.DIRT.defaultBlockState(),
+                33
+            )
+        )
+        .decorated(UNDERGROUND_RANGE)
+        .squared()
+        .count(5)
+    );
+    public static final ConfiguredFeature<?, ?> ORE_GRAVEL_LOWER = FEATURES.register(
+        "ore_gravel_lower",
+        Feature.ORE.configured(
+            new OreConfiguration(
+                OreConfiguration.Predicates.NATURAL_STONE,
+                Blocks.GRAVEL.defaultBlockState(),
+                33
+            )
+        )
+        .decorated(UNDERGROUND_RANGE)
+        .squared()
+        .count(4)
+    );
+    public static final ConfiguredFeature<?, ?> ORE_GRANITE_LOWER = FEATURES.register(
+        "ore_granite_lower",
+        Feature.ORE.configured(
+            new OreConfiguration(
+                OreConfiguration.Predicates.NATURAL_STONE,
+                Blocks.GRANITE.defaultBlockState(),
+                33
+            )
+        )
+        .decorated(UNDERGROUND_RANGE)
+        .squared()
+        .count(5)
+    );
+    public static final ConfiguredFeature<?, ?> ORE_DIORITE_LOWER = FEATURES.register(
+        "ore_diorite_lower",
+        Feature.ORE.configured(
+            new OreConfiguration(
+                OreConfiguration.Predicates.NATURAL_STONE,
+                Blocks.DIORITE.defaultBlockState(),
+                33
+            )
+        )
+        .decorated(UNDERGROUND_RANGE)
+        .squared()
+        .count(5)
+    );
+    public static final ConfiguredFeature<?, ?> ORE_ANDESITE_LOWER = FEATURES.register(
+        "ore_andesite_lower",
+        Feature.ORE.configured(
+            new OreConfiguration(
+                OreConfiguration.Predicates.NATURAL_STONE,
+                Blocks.ANDESITE.defaultBlockState(),
+                33
+            )
+        )
+        .decorated(UNDERGROUND_RANGE)
+        .squared()
+        .count(5)
+    );
     
     public static final class Settings {
         private static final Set<Block> WATER_SPRING_REPLACEABLES = ImmutableSet.of(

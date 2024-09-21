@@ -4,7 +4,6 @@
   "package": "com.blackgear.offlimits.core.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "common.level.network.ClientboundLightUpdatePacketMixin",
     "common.access.ConfiguredWorldCarverAccessor",
     "common.access.DimensionTypeAccessor",
     "common.access.NoiseBasedChunkGeneratorAccessor",
@@ -40,6 +39,9 @@
     "common.level.entity.RandomPosMixin",
     "common.level.entity.WalkNodeEvaluatorMixin",
     "common.level.network.ClientboundLevelChunkPacketMixin",
+    "common.level.network.ClientboundLightUpdatePacketMixin",
+    "common.level.portal.PortalForcerMixin",
+    "common.level.portal.PortalShapeMixin",
     "common.level.structure.MineShaftPiecesMixin",
     "common.level.structure.StructureFeatureManagerMixin",
     "common.level.surface.BadlandsSurfaceBuilderMixin",

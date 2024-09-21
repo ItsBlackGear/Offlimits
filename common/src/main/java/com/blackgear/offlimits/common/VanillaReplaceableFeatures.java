@@ -106,4 +106,26 @@ public class VanillaReplaceableFeatures {
             writer.removeFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_INFESTED);
         }
     }
+    
+    public static void addDefaultStonesAndSoils(BiomeWriter writer, BiomeContext context) {
+        if (context.hasFeature(Features.ORE_DIRT)) {
+            writer.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, UndergroundFeatureReplacements.ORE_DIRT_LOWER);
+        }
+        
+        if (context.hasFeature(Features.ORE_GRAVEL)) {
+            writer.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, UndergroundFeatureReplacements.ORE_GRAVEL_LOWER);
+        }
+        
+        if (context.hasFeature(Features.ORE_GRANITE)) {
+            writer.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, UndergroundFeatureReplacements.ORE_GRANITE_LOWER);
+        }
+        
+        if (context.hasFeature(Features.ORE_DIORITE)) {
+            writer.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, UndergroundFeatureReplacements.ORE_DIORITE_LOWER);
+        }
+        
+        if (context.hasFeature(Features.ORE_ANDESITE)) {
+            writer.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, UndergroundFeatureReplacements.ORE_ANDESITE_LOWER);
+        }
+    }
 }
